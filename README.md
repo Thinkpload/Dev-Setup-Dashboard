@@ -11,18 +11,18 @@ A GitHub Template Repository for new SaaS projects. Ships with **BMAD Method v6*
 
 ## What's included
 
-| Layer | Tool | Purpose |
-|---|---|---|
-| App Framework | Next.js 15 + React 19 | App Router, RSC, Server Actions |
-| Styling | Tailwind CSS v4 + shadcn/ui | Direction D purple theme, dark mode default |
-| Auth | Better Auth / Clerk (your choice) | Self-hosted or managed auth |
-| ORM | Prisma / Drizzle (your choice) | Schema-first or code-first DB |
-| Database | PostgreSQL (Neon prod, Docker local) | Serverless-ready |
-| AI Workflows | BMAD Method v6 | PM, Architect, Dev, QA, SM agents |
-| CI/CD | GitHub Actions | Lint → Test → SonarCloud → Build |
-| Auto Bugfix | `/fix-issue <N>` in Claude Code | AI-generated fix PR on CI failure |
-| Dependency Updates | Renovate | Weekly grouped PRs, automerge |
-| Security | CodeQL + npm audit + license scan | Automated on every push |
+| Layer              | Tool                                 | Purpose                                     |
+| ------------------ | ------------------------------------ | ------------------------------------------- |
+| App Framework      | Next.js 15 + React 19                | App Router, RSC, Server Actions             |
+| Styling            | Tailwind CSS v4 + shadcn/ui          | Direction D purple theme, dark mode default |
+| Auth               | Better Auth / Clerk (your choice)    | Self-hosted or managed auth                 |
+| ORM                | Prisma / Drizzle (your choice)       | Schema-first or code-first DB               |
+| Database           | PostgreSQL (Neon prod, Docker local) | Serverless-ready                            |
+| AI Workflows       | BMAD Method v6                       | PM, Architect, Dev, QA, SM agents           |
+| CI/CD              | GitHub Actions                       | Lint → Test → SonarCloud → Build            |
+| Auto Bugfix        | `/fix-issue <N>` in Claude Code      | AI-generated fix PR on CI failure           |
+| Dependency Updates | Renovate                             | Weekly grouped PRs, automerge               |
+| Security           | CodeQL + npm audit + license scan    | Automated on every push                     |
 
 ---
 
@@ -43,12 +43,14 @@ npx create-ai-template
 ```
 
 The wizard will:
+
 - Ask 5 questions with educational hints (AI methodology, auth, ORM, optional modules)
 - Install only what you chose and remove the rest
 - Show real-time progress per module
 - Display next steps and auto-bugfix preview on success
 
 Or use defaults non-interactively:
+
 ```bash
 npx create-ai-template --yes
 ```
@@ -74,10 +76,10 @@ npm run dev            # Start Next.js on http://localhost:3000
 
 Go to **Settings → Secrets and variables → Actions**:
 
-| Secret | Where to get it |
-|---|---|
-| `SONAR_TOKEN` | [sonarcloud.io](https://sonarcloud.io) → My Account → Security → Generate token |
-| `GITHUB_TOKEN` | Provided automatically by GitHub Actions |
+| Secret         | Where to get it                                                                 |
+| -------------- | ------------------------------------------------------------------------------- |
+| `SONAR_TOKEN`  | [sonarcloud.io](https://sonarcloud.io) → My Account → Security → Generate token |
+| `GITHUB_TOKEN` | Provided automatically by GitHub Actions                                        |
 
 ---
 
@@ -93,22 +95,40 @@ CI fails → GitHub Issue created (job + error log + SHA + branch)
          → After 3 failed attempts → needs-human label, stops
 ```
 
+### How to use `/fix-issue`
+
+1. **CI fails** on a push or PR — the `auto-bugfix.yml` workflow creates a GitHub Issue labeled `auto-bugfix` with the failing job name, last 50 lines of the error log, commit SHA, and branch.
+2. **Open the issue** in your GitHub repository and note the issue number (e.g., `#42`).
+3. **Open Claude Code** in your project directory.
+4. **Run the command:**
+   ```
+   /fix-issue 42
+   ```
+5. Claude Code reads the issue, locates the relevant code, applies the minimal fix, runs tests, commits with `[skip ci]`, and opens a PR targeting the failing branch.
+6. **Review and merge** the PR if the fix looks correct.
+
+**Safety mechanisms built in:**
+
+- `[skip ci]` on fix commits prevents re-triggering the auto-bugfix loop.
+- Bot actor guard in `auto-bugfix.yml` prevents Dependabot/Renovate from triggering new issues.
+- After **3 failed fix attempts**, the issue is labeled `needs-human` and no further automated PRs are opened — a comment "Auto-fix limit reached. Manual investigation required." is posted.
+
 ---
 
 ## BMAD Agent Workflows
 
 All 8 BMAD agents are available as slash commands immediately after cloning (no setup required):
 
-| Agent | Slash Command | Role |
-|---|---|---|
-| Orchestrator | `/bmad-help` | Routes tasks across agents |
-| PM | `/bmad-pm` | PRD and planning |
-| Architect | `/bmad-architect` | Technical architecture |
-| UX Designer | `/bmad-ux-designer` | UI/UX specifications |
-| Dev | `/bmad-dev` | Implementation guidance |
-| QA | `/bmad-qa` | Testing strategy |
-| Scrum Master | `/bmad-sm` | Sprint planning |
-| Tech Writer | `/bmad-tech-writer` | Documentation |
+| Agent        | Slash Command       | Role                       |
+| ------------ | ------------------- | -------------------------- |
+| Orchestrator | `/bmad-help`        | Routes tasks across agents |
+| PM           | `/bmad-pm`          | PRD and planning           |
+| Architect    | `/bmad-architect`   | Technical architecture     |
+| UX Designer  | `/bmad-ux-designer` | UI/UX specifications       |
+| Dev          | `/bmad-dev`         | Implementation guidance    |
+| QA           | `/bmad-qa`          | Testing strategy           |
+| Scrum Master | `/bmad-sm`          | Sprint planning            |
+| Tech Writer  | `/bmad-tech-writer` | Documentation              |
 
 ---
 

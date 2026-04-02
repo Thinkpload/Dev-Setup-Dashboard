@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-22
-last_updated: 2026-04-02 # story 5.1 review
+last_updated: 2026-04-02 # story 5.2 review
 project: "!Template_BMAD+auto-CI-CD"
 project_key: NOKEY
 tracking_system: file-system
@@ -78,7 +78,7 @@ development_status:
   # Epic 5: Auto-Bugfix Pipeline (Killer Feature)
   epic-5: in-progress
   5-1-ci-failure-auto-issue-creation: review
-  5-2-fix-issue-claude-code-skill-integration: backlog
+  5-2-fix-issue-claude-code-skill-integration: review # implemented 2026-04-02
   epic-5-retrospective: optional
 
   # Epic 6: Governance & Community Infrastructure
