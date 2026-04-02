@@ -1,0 +1,122 @@
+name: Auto-Bugfix Issue Creator
+
+# Triggers after the CI workflow completes (success or failure).
+# Using workflow_run gives this job write permissions even for fork PRs,
+# which the triggered workflow itself would not have.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+jobs:
+  create-issue:
+    name: Create Issue on CI Failure
+    runs-on: ubuntu-latest
+    # Only run when CI failed AND actor is not a bot (prevents infinite loops)
+    if: |
+      github.event.workflow_run.conclusion == 'failure' &&
+      !endsWith(github.event.workflow_run.actor.login, '[bot]')
+    permissions:
+      issues: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Ensure auto-bugfix label exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "auto-bugfix" \
+            --color "E4E669" \
+            --description "Automatically created from CI failure" \
+            --repo "${{ github.repository }}" || true
+
+      - name: Get failed jobs
+        id: failed-jobs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          FAILED=$(gh api \
+            "/repos/${{ github.repository }}/actions/runs/${RUN_ID}/jobs" \
+            --jq '[.jobs[] | select(.conclusion == "failure") | {name: .name, id: .id}]')
+          echo "jobs=${FAILED}" >> "$GITHUB_OUTPUT"
+          echo "count=$(echo "$FAILED" | jq 'length')" >> "$GITHUB_OUTPUT"
+
+      - name: Create issues for each failed job
+        if: steps.failed-jobs.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+          FAILED_JOBS: ${{ steps.failed-jobs.outputs.jobs }}
+        run: |
+          SHORT_SHA="${SHA:0:8}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${RUN_ID}"
+
+          echo "$FAILED_JOBS" | jq -c '.[]' | while read -r job; do
+            JOB_NAME=$(echo "$job" | jq -r '.name')
+            JOB_ID=$(echo "$job"   | jq -r '.id')
+            TITLE="CI Failed: ${JOB_NAME} on ${BRANCH} (${SHORT_SHA})"
+
+            # Deduplication: skip if open issue with same title already exists
+            EXISTING=$(gh issue list \
+              --repo "${{ github.repository }}" \
+              --search "\"${TITLE}\"" \
+              --state open \
+              --json number \
+              --limit 1 2>/dev/null || echo "[]")
+            if [ "$EXISTING" != "[]" ] && [ "$(echo "$EXISTING" | jq 'length')" -gt 0 ]; then
+              echo "Duplicate issue found for '${TITLE}', skipping."
+              continue
+            fi
+
+            # Fetch last 50 lines of job log (best-effort; may be empty for short logs)
+            LOG_TAIL=$(gh api \
+              "/repos/${{ github.repository }}/actions/jobs/${JOB_ID}/logs" \
+              2>/dev/null | tail -50 || echo "(log unavailable)")
+
+            # Build structured issue body
+            cat > /tmp/issue_body.md <<BODY
+## CI Failure Report
+
+| Field | Value |
+|---|---|
+| **Job** | \`${JOB_NAME}\` |
+| **Branch** | \`${BRANCH}\` |
+| **Commit** | \`${SHA}\` |
+| **Run** | [#${RUN_NUMBER}](${RUN_URL}) |
+
+## Error Log (last 50 lines)
+
+\`\`\`
+${LOG_TAIL}
+\`\`\`
+
+## Auto-Fix Payload
+
+\`\`\`json
+{
+  "job": "${JOB_NAME}",
+  "branch": "${BRANCH}",
+  "sha": "${SHA}",
+  "run_id": "${RUN_ID}",
+  "run_url": "${RUN_URL}",
+  "error_log": $(echo "$LOG_TAIL" | jq -Rs .)
+}
+\`\`\`
+
+---
+*Run \`/fix-issue <number>\` in Claude Code to attempt an automated fix.*
+BODY
+
+            gh issue create \
+              --repo "${{ github.repository }}" \
+              --title "${TITLE}" \
+              --body-file /tmp/issue_body.md \
+              --label "auto-bugfix"
+
+            echo "Created issue for job '${JOB_NAME}'"
+          done

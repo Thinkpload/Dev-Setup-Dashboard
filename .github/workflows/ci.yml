@@ -135,19 +135,3 @@ jobs:
           DATABASE_URL: 'postgresql://stub:stub@localhost:5432/stub'
           NEXTAUTH_SECRET: 'ci-stub-secret-32-chars-minimum!!'
           NEXTAUTH_URL: 'http://localhost:3000'
-
-      - name: Report CI Failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          {
-            echo "**Job:** \`${{ github.job }}\`"
-            echo "**Branch:** \`${{ github.ref_name }}\`"
-            echo "**Commit:** \`${{ github.sha }}\`"
-            echo "**Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          } > issue_body.md
-          gh issue create \
-            --title "CI Failed: build on ${{ github.ref_name }} (#${{ github.run_number }})" \
-            --body-file issue_body.md \
-            --label "bug,ci-failure" || true

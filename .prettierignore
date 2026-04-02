@@ -1,0 +1,2 @@
+# Workflows containing bash heredocs with markdown content confuse Prettier's YAML parser
+.github/workflows/auto-bugfix.yml
