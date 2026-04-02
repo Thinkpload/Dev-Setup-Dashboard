@@ -40,7 +40,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockSpinnerStart.mockClear();
   mockSpinnerStop.mockClear();
-  vi.mocked(spawnSync).mockReturnValue({ status: 0, error: undefined, stderr: '' } as ReturnType<typeof spawnSync>);
+  vi.mocked(spawnSync).mockReturnValue({ status: 0, error: undefined, stderr: '' } as ReturnType<
+    typeof spawnSync
+  >);
 });
 
 afterEach(() => {
@@ -73,10 +75,13 @@ describe('runInstaller', () => {
       })
     );
     await runInstaller(selections, true, tmpDir);
-    // husky devDeps (husky@...) should NOT be installed (idempotency guard)
+    // When husky installState is 'installed' in config, it should be skipped (idempotency)
     const calls = vi.mocked(spawnSync).mock.calls;
-    const huskyInstallCall = calls.find(c =>
-      Array.isArray(c[1]) && c[1].includes('--save-dev') && c[1].some((a: unknown) => typeof a === 'string' && (a as string).includes('husky@'))
+    const huskyInstallCall = calls.find(
+      (c) =>
+        Array.isArray(c[1]) &&
+        c[1].includes('--save-dev') &&
+        c[1].some((a: unknown) => typeof a === 'string' && (a as string).includes('husky@'))
     );
     expect(huskyInstallCall).toBeUndefined();
   });
@@ -84,15 +89,20 @@ describe('runInstaller', () => {
   it('calls spawnSync with npm install --save-dev and devDeps for pending modules', async () => {
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     await runInstaller(selections, true, tmpDir);
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     expect(spawnSync).toHaveBeenCalledWith(
-      'npm',
+      npmCmd,
       expect.arrayContaining(['install', '--save-dev']),
       expect.objectContaining({ cwd: tmpDir })
     );
   });
 
   it('marks module as failed in config when spawnSync returns non-zero status, then continues', async () => {
-    vi.mocked(spawnSync).mockReturnValue({ status: 1, error: undefined, stderr: 'error' } as ReturnType<typeof spawnSync>);
+    vi.mocked(spawnSync).mockReturnValue({
+      status: 1,
+      error: undefined,
+      stderr: 'error',
+    } as ReturnType<typeof spawnSync>);
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     // Should not throw — installer continues after failure
     await expect(runInstaller(selections, true, tmpDir)).resolves.not.toThrow();
@@ -189,12 +199,14 @@ describe('spinner version display', () => {
 
 describe('consolidated error display', () => {
   it('log.error is called with consolidated header after all modules complete when a module fails', async () => {
-    vi.mocked(spawnSync).mockReturnValue({ status: 1, error: undefined, stderr: 'install failed' } as ReturnType<typeof spawnSync>);
+    vi.mocked(spawnSync).mockReturnValue({
+      status: 1,
+      error: undefined,
+      stderr: 'install failed',
+    } as ReturnType<typeof spawnSync>);
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     await runInstaller(selections, true, tmpDir);
-    expect(vi.mocked(log.error)).toHaveBeenCalledWith(
-      expect.stringMatching(/failed to install/i)
-    );
+    expect(vi.mocked(log.error)).toHaveBeenCalledWith(expect.stringMatching(/failed to install/i));
   });
 
   it('log.error is NOT called mid-loop — only after all modules finish', async () => {
@@ -218,8 +230,8 @@ describe('consolidated error display', () => {
     let errorCalledBeforeBothModulesFinished = false;
     vi.mocked(log.error).mockImplementation(() => {
       // At this point both modules should have had their spinner stopped
-      const failedModulesStopped = stopCallLabels.some(l => l.includes('failed'));
-      const successModulesStopped = stopCallLabels.some(l => l.includes('installed'));
+      const failedModulesStopped = stopCallLabels.some((l) => l.includes('failed'));
+      const successModulesStopped = stopCallLabels.some((l) => l.includes('installed'));
       if (!failedModulesStopped || !successModulesStopped) {
         errorCalledBeforeBothModulesFinished = true;
       }
@@ -230,13 +242,21 @@ describe('consolidated error display', () => {
   });
 
   it('installer resolves (does not throw) even when all modules fail', async () => {
-    vi.mocked(spawnSync).mockReturnValue({ status: 1, error: undefined, stderr: 'fail' } as ReturnType<typeof spawnSync>);
+    vi.mocked(spawnSync).mockReturnValue({
+      status: 1,
+      error: undefined,
+      stderr: 'fail',
+    } as ReturnType<typeof spawnSync>);
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky', 'eslint'] };
     await expect(runInstaller(selections, true, tmpDir)).resolves.not.toThrow();
   });
 
   it('spinner stop is called with "<label> failed" message on failure', async () => {
-    vi.mocked(spawnSync).mockReturnValue({ status: 1, error: undefined, stderr: 'fail' } as ReturnType<typeof spawnSync>);
+    vi.mocked(spawnSync).mockReturnValue({
+      status: 1,
+      error: undefined,
+      stderr: 'fail',
+    } as ReturnType<typeof spawnSync>);
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     await runInstaller(selections, true, tmpDir);
     expect(mockSpinnerStop).toHaveBeenCalledWith(expect.stringContaining('failed'));
@@ -245,33 +265,57 @@ describe('consolidated error display', () => {
 
 describe('auth setup', () => {
   it('better-auth: installs better-auth runtime dep (no --save-dev)', async () => {
-    const selections: UserSelections = { ...baseSelections, authProvider: 'better-auth', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      authProvider: 'better-auth',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     const calls = vi.mocked(spawnSync).mock.calls;
-    const authCall = calls.find(c => Array.isArray(c[1]) && c[1].some((a: unknown) => typeof a === 'string' && a.includes('better-auth')));
+    const authCall = calls.find(
+      (c) =>
+        Array.isArray(c[1]) &&
+        c[1].some((a: unknown) => typeof a === 'string' && a.includes('better-auth'))
+    );
     expect(authCall).toBeDefined();
     // Must NOT include --save-dev
     expect(authCall?.[1]).not.toContain('--save-dev');
   });
 
   it('better-auth: writes src/lib/auth.ts to target directory', async () => {
-    const selections: UserSelections = { ...baseSelections, authProvider: 'better-auth', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      authProvider: 'better-auth',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     const { existsSync: fsExists } = await import('node:fs');
     expect(fsExists(join(tmpDir, 'src', 'lib', 'auth.ts'))).toBe(true);
   });
 
   it('clerk: installs @clerk/nextjs runtime dep (no --save-dev)', async () => {
-    const selections: UserSelections = { ...baseSelections, authProvider: 'clerk', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      authProvider: 'clerk',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     const calls = vi.mocked(spawnSync).mock.calls;
-    const authCall = calls.find(c => Array.isArray(c[1]) && c[1].some((a: unknown) => typeof a === 'string' && a.includes('@clerk/nextjs')));
+    const authCall = calls.find(
+      (c) =>
+        Array.isArray(c[1]) &&
+        c[1].some((a: unknown) => typeof a === 'string' && a.includes('@clerk/nextjs'))
+    );
     expect(authCall).toBeDefined();
     expect(authCall?.[1]).not.toContain('--save-dev');
   });
 
   it('clerk: writes src/lib/auth.ts to target directory', async () => {
-    const selections: UserSelections = { ...baseSelections, authProvider: 'clerk', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      authProvider: 'clerk',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     const { existsSync: fsExists } = await import('node:fs');
     expect(fsExists(join(tmpDir, 'src', 'lib', 'auth.ts'))).toBe(true);
@@ -288,63 +332,115 @@ describe('orm setup', () => {
   });
 
   it('prisma: installs prisma devDep and @prisma/client runtime dep', async () => {
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'prisma', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'prisma',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     const calls = vi.mocked(spawnSync).mock.calls;
-    const prismaDevCall = calls.find(c => Array.isArray(c[1]) && c[1].includes('--save-dev') && c[1].some((a: unknown) => typeof a === 'string' && a.includes('prisma@')));
+    const prismaDevCall = calls.find(
+      (c) =>
+        Array.isArray(c[1]) &&
+        c[1].includes('--save-dev') &&
+        c[1].some((a: unknown) => typeof a === 'string' && a.includes('prisma@'))
+    );
     expect(prismaDevCall).toBeDefined();
-    const prismaClientCall = calls.find(c => Array.isArray(c[1]) && !c[1].includes('--save-dev') && c[1].some((a: unknown) => typeof a === 'string' && a.includes('@prisma/client')));
+    const prismaClientCall = calls.find(
+      (c) =>
+        Array.isArray(c[1]) &&
+        !c[1].includes('--save-dev') &&
+        c[1].some((a: unknown) => typeof a === 'string' && a.includes('@prisma/client'))
+    );
     expect(prismaClientCall).toBeDefined();
   });
 
   it('prisma: deletes drizzle/ directory', async () => {
     const { existsSync: fsExists } = await import('node:fs');
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'prisma', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'prisma',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     expect(fsExists(join(tmpDir, 'drizzle'))).toBe(false);
   });
 
   it('prisma: keeps prisma/ directory intact', async () => {
     const { existsSync: fsExists } = await import('node:fs');
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'prisma', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'prisma',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     expect(fsExists(join(tmpDir, 'prisma'))).toBe(true);
   });
 
   it('prisma: writes src/lib/db.ts to target directory', async () => {
     const { existsSync: fsExists } = await import('node:fs');
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'prisma', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'prisma',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     expect(fsExists(join(tmpDir, 'src', 'lib', 'db.ts'))).toBe(true);
   });
 
   it('drizzle: installs drizzle-orm runtime dep and drizzle-kit devDep', async () => {
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'drizzle', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'drizzle',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     const calls = vi.mocked(spawnSync).mock.calls;
-    const drizzleOrmCall = calls.find(c => Array.isArray(c[1]) && !c[1].includes('--save-dev') && c[1].some((a: unknown) => typeof a === 'string' && a.includes('drizzle-orm')));
+    const drizzleOrmCall = calls.find(
+      (c) =>
+        Array.isArray(c[1]) &&
+        !c[1].includes('--save-dev') &&
+        c[1].some((a: unknown) => typeof a === 'string' && a.includes('drizzle-orm'))
+    );
     expect(drizzleOrmCall).toBeDefined();
-    const drizzleKitCall = calls.find(c => Array.isArray(c[1]) && c[1].includes('--save-dev') && c[1].some((a: unknown) => typeof a === 'string' && a.includes('drizzle-kit')));
+    const drizzleKitCall = calls.find(
+      (c) =>
+        Array.isArray(c[1]) &&
+        c[1].includes('--save-dev') &&
+        c[1].some((a: unknown) => typeof a === 'string' && a.includes('drizzle-kit'))
+    );
     expect(drizzleKitCall).toBeDefined();
   });
 
   it('drizzle: deletes prisma/ directory', async () => {
     const { existsSync: fsExists } = await import('node:fs');
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'drizzle', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'drizzle',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     expect(fsExists(join(tmpDir, 'prisma'))).toBe(false);
   });
 
   it('drizzle: keeps drizzle/ directory intact', async () => {
     const { existsSync: fsExists } = await import('node:fs');
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'drizzle', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'drizzle',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     expect(fsExists(join(tmpDir, 'drizzle'))).toBe(true);
   });
 
   it('drizzle: writes src/lib/db.ts to target directory', async () => {
     const { existsSync: fsExists } = await import('node:fs');
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'drizzle', selectedModules: [] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'drizzle',
+      selectedModules: [],
+    };
     await runInstaller(selections, true, tmpDir);
     expect(fsExists(join(tmpDir, 'src', 'lib', 'db.ts'))).toBe(true);
   });
@@ -355,7 +451,11 @@ describe('.template-config.json persists auth and orm choices', () => {
   // buildInitialConfig (called in index.ts before runInstaller) writes authProvider + ormChoice.
   // These tests verify that runInstaller preserves authProvider/ormChoice from a pre-written config.
   it('config retains authProvider when a module is installed', async () => {
-    const selections: UserSelections = { ...baseSelections, authProvider: 'better-auth', selectedModules: ['eslint'] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      authProvider: 'better-auth',
+      selectedModules: ['eslint'],
+    };
     // Pre-write config with authProvider (as buildInitialConfig does in index.ts)
     writeFileSync(
       join(tmpDir, '.template-config.json'),
@@ -376,7 +476,11 @@ describe('.template-config.json persists auth and orm choices', () => {
   });
 
   it('config retains ormChoice when a module is installed', async () => {
-    const selections: UserSelections = { ...baseSelections, ormChoice: 'drizzle', selectedModules: ['eslint'] };
+    const selections: UserSelections = {
+      ...baseSelections,
+      ormChoice: 'drizzle',
+      selectedModules: ['eslint'],
+    };
     writeFileSync(
       join(tmpDir, '.template-config.json'),
       JSON.stringify({
@@ -401,7 +505,9 @@ describe('success screen', () => {
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     await runInstaller(selections, true, tmpDir);
     const noteCalls = vi.mocked(note).mock.calls;
-    const summaryCall = noteCalls.find(c => typeof c[0] === 'string' && /\d+\s+module/i.test(c[0]));
+    const summaryCall = noteCalls.find(
+      (c) => typeof c[0] === 'string' && /\d+\s+module/i.test(c[0])
+    );
     expect(summaryCall).toBeDefined();
   });
 
@@ -409,9 +515,10 @@ describe('success screen', () => {
     const selections: UserSelections = { ...baseSelections, selectedModules: [] };
     await runInstaller(selections, true, tmpDir);
     const noteCalls = vi.mocked(note).mock.calls;
-    const autoBugfixCall = noteCalls.find(c =>
-      (typeof c[0] === 'string' && c[0].includes('/fix-issue')) ||
-      (typeof c[1] === 'string' && c[1].includes('fix-issue'))
+    const autoBugfixCall = noteCalls.find(
+      (c) =>
+        (typeof c[0] === 'string' && c[0].includes('/fix-issue')) ||
+        (typeof c[1] === 'string' && c[1].includes('fix-issue'))
     );
     expect(autoBugfixCall).toBeDefined();
   });
@@ -425,36 +532,47 @@ describe('success screen', () => {
   it('outro() message contains a success phrase', async () => {
     const selections: UserSelections = { ...baseSelections, selectedModules: [] };
     await runInstaller(selections, true, tmpDir);
-    expect(vi.mocked(outro)).toHaveBeenCalledWith(expect.stringMatching(/set|ready|done|complete|building/i));
+    expect(vi.mocked(outro)).toHaveBeenCalledWith(
+      expect.stringMatching(/set|ready|done|complete|building/i)
+    );
   });
 
-  it('note() is called with content containing git push command (What\'s next section)', async () => {
+  it("note() is called with content containing git push command (What's next section)", async () => {
     const selections: UserSelections = { ...baseSelections, selectedModules: [] };
     await runInstaller(selections, true, tmpDir);
     const noteCalls = vi.mocked(note).mock.calls;
-    const nextstepsCall = noteCalls.find(c =>
-      (typeof c[0] === 'string' && c[0].includes('git push')) ||
-      (typeof c[1] === 'string' && c[1].includes('What'))
+    const nextstepsCall = noteCalls.find(
+      (c) =>
+        (typeof c[0] === 'string' && c[0].includes('git push')) ||
+        (typeof c[1] === 'string' && c[1].includes('What'))
     );
     expect(nextstepsCall).toBeDefined();
   });
 
   it('when modules fail: outro() is still called exactly once (success screen shown even on failure)', async () => {
-    vi.mocked(spawnSync).mockReturnValue({ status: 1, error: undefined, stderr: 'fail' } as ReturnType<typeof spawnSync>);
+    vi.mocked(spawnSync).mockReturnValue({
+      status: 1,
+      error: undefined,
+      stderr: 'fail',
+    } as ReturnType<typeof spawnSync>);
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     await runInstaller(selections, true, tmpDir);
     expect(vi.mocked(outro)).toHaveBeenCalledTimes(1);
   });
 
   it('when modules fail: failure info appears in note() or outro() output', async () => {
-    vi.mocked(spawnSync).mockReturnValue({ status: 1, error: undefined, stderr: 'fail' } as ReturnType<typeof spawnSync>);
+    vi.mocked(spawnSync).mockReturnValue({
+      status: 1,
+      error: undefined,
+      stderr: 'fail',
+    } as ReturnType<typeof spawnSync>);
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     await runInstaller(selections, true, tmpDir);
     const allTextCalls = [
-      ...vi.mocked(note).mock.calls.map(c => String(c[0] ?? '')),
-      ...vi.mocked(outro).mock.calls.map(c => String(c[0] ?? '')),
+      ...vi.mocked(note).mock.calls.map((c) => String(c[0] ?? '')),
+      ...vi.mocked(outro).mock.calls.map((c) => String(c[0] ?? '')),
     ];
-    const hasFail = allTextCalls.some(t => /fail|fix|error/i.test(t));
+    const hasFail = allTextCalls.some((t) => /fail|fix|error/i.test(t));
     expect(hasFail).toBe(true);
   });
 });

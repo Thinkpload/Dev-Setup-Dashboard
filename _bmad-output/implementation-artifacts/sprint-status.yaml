@@ -36,7 +36,7 @@
 
 generated: 2026-03-22
 last_updated: 2026-04-02 # story 5.2 review
-project: "!Template_BMAD+auto-CI-CD"
+project: '!Template_BMAD+auto-CI-CD'
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -48,7 +48,7 @@ development_status:
   1-2-cli-wizard-welcome-os-detection-and-prompt-flow: done # reviewed 2026-03-26
   1-3-cli-wizard-module-installation-and-feedback: done # reviewed 2026-03-26
   1-4-cli-wizard-auth-and-orm-selection-with-cleanup: review
-  1-5-cli-wizard-success-screen-and-auto-bugfix-preview: review
+  1-5-cli-wizard-success-screen-and-auto-bugfix-preview: done
   epic-1-retrospective: optional
 
   # Epic 2: CI/CD & Code Quality Pipeline

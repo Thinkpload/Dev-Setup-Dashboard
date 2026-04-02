@@ -44,7 +44,9 @@ Thumbs.db
 *.sw?
 
 # ── BMAD outputs ──────────────────────────────────────────────
-_bmad-output/
+_bmad-output/**
+!_bmad-output/implementation-artifacts/
+!_bmad-output/implementation-artifacts/sprint-status.yaml
 
 # ── Prisma ────────────────────────────────────────────────────
 *.db
@@ -58,3 +60,4 @@ prisma/migrations/**/migration_lock.toml
 
 # ── Husky ─────────────────────────────────────────────────────
 .husky/_
+nul

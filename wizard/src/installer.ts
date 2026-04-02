@@ -59,11 +59,11 @@ export function mergePackageJson(pkgPath: string, additions: PackageJsonAddition
 }
 
 function npmInstallDevDeps(packages: string[], cwd: string): void {
-  const result = spawnSync('npm', ['install', '--save-dev', ...packages], {
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const result = spawnSync(npmCmd, ['install', '--save-dev', ...packages], {
     cwd,
     stdio: 'pipe',
     encoding: 'utf-8',
-    shell: true,
   });
   if (result.error) throw result.error;
   if (result.status !== 0 && result.status !== null) {
@@ -72,11 +72,11 @@ function npmInstallDevDeps(packages: string[], cwd: string): void {
 }
 
 function npmInstallDeps(packages: string[], cwd: string): void {
-  const result = spawnSync('npm', ['install', ...packages], {
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const result = spawnSync(npmCmd, ['install', ...packages], {
     cwd,
     stdio: 'pipe',
     encoding: 'utf-8',
-    shell: true,
   });
   if (result.error) throw result.error;
   if (result.status !== 0 && result.status !== null) {
@@ -142,7 +142,10 @@ function copyTemplateDir(templateRelPath: string, destDir: string, _yesMode: boo
  * Used for auth/ORM templates that have nested paths (e.g. src/lib/auth.ts).
  */
 function copyTemplateDirDeep(srcDir: string, destDir: string): void {
-  if (!existsSync(srcDir)) return;
+  if (!existsSync(srcDir)) {
+    log.warn(`Template directory does not exist: ${srcDir}`);
+    return;
+  }
   mkdirSync(destDir, { recursive: true });
   const entries = readdirSync(srcDir, { withFileTypes: true });
   for (const entry of entries) {
@@ -161,7 +164,9 @@ function runPostInstall(commands: string[], cwd: string): void {
     // Husky install requires .git
     if (cmd.includes('husky install') || cmd.includes('husky')) {
       if (!existsSync(join(cwd, '.git'))) {
-        log.warn('No .git directory found — skipping husky install (run it manually after git init)');
+        log.warn(
+          'No .git directory found — skipping husky install (run it manually after git init)'
+        );
         continue;
       }
     }
@@ -183,9 +188,9 @@ function runPostInstall(commands: string[], cwd: string): void {
 function updateModuleState(
   config: TemplateConfig,
   moduleId: string,
-  state: 'installed' | 'failed',
+  state: 'installed' | 'failed'
 ): void {
-  const record = config.modules.find(m => m.id === moduleId);
+  const record = config.modules.find((m) => m.id === moduleId);
   if (record) {
     record.installState = state;
   } else {
@@ -210,7 +215,10 @@ function getPackageJsonAdditions(moduleId: string): PackageJsonAdditions {
   return map[moduleId] ?? {};
 }
 
-async function runAuthSetup(selections: UserSelections, targetDir: string): Promise<void> {
+async function runAuthSetup(
+  selections: UserSelections,
+  targetDir: string
+): Promise<{ failed: boolean; error?: string }> {
   const isClerk = selections.authProvider === 'clerk';
   const label = isClerk ? 'Clerk' : 'Better Auth';
   const s = spinner();
@@ -223,17 +231,26 @@ async function runAuthSetup(selections: UserSelections, targetDir: string): Prom
 
     const templateName = isClerk ? 'auth-clerk' : 'auth-better-auth';
     const srcDir = join(__dirname, '..', 'templates', templateName);
-    copyTemplateDirDeep(srcDir, targetDir);
+    if (!existsSync(srcDir)) {
+      log.warn(`Auth template not found: ${srcDir}`);
+    } else {
+      copyTemplateDirDeep(srcDir, targetDir);
+    }
 
     s.stop(`${label} configured`);
+    return { failed: false };
   } catch (err) {
     s.stop(`${label} configuration failed`);
     const msg = err instanceof Error ? err.message : String(err);
     log.error(`Auth setup failed: ${msg}`);
+    return { failed: true, error: msg };
   }
 }
 
-async function runOrmSetup(selections: UserSelections, targetDir: string): Promise<void> {
+async function runOrmSetup(
+  selections: UserSelections,
+  targetDir: string
+): Promise<{ failed: boolean; error?: string }> {
   const isPrisma = selections.ormChoice === 'prisma';
   const label = isPrisma ? 'Prisma' : 'Drizzle';
   const s = spinner();
@@ -243,39 +260,55 @@ async function runOrmSetup(selections: UserSelections, targetDir: string): Promi
       npmInstallDevDeps([`prisma@${PRISMA_VERSION}`], targetDir);
       npmInstallDeps([`@prisma/client@${PRISMA_CLIENT_VERSION}`], targetDir);
       const drizzleDir = join(targetDir, 'drizzle');
-      if (existsSync(drizzleDir)) rmSync(drizzleDir, { recursive: true, force: true });
+      if (existsSync(drizzleDir)) {
+        const files = readdirSync(drizzleDir);
+        if (files.length > 0 && files[0] !== '.gitkeep') {
+          log.warn(`Removing non-empty drizzle/ directory — will be replaced by Prisma`);
+        }
+        rmSync(drizzleDir, { recursive: true, force: true });
+      }
     } else {
       npmInstallDeps([`drizzle-orm@${DRIZZLE_ORM_VERSION}`], targetDir);
       npmInstallDevDeps([`drizzle-kit@${DRIZZLE_KIT_VERSION}`], targetDir);
       const prismaDir = join(targetDir, 'prisma');
-      if (existsSync(prismaDir)) rmSync(prismaDir, { recursive: true, force: true });
+      if (existsSync(prismaDir)) {
+        const files = readdirSync(prismaDir);
+        if (files.length > 0 && files[0] !== '.gitkeep') {
+          log.warn(`Removing non-empty prisma/ directory — will be replaced by Drizzle`);
+        }
+        rmSync(prismaDir, { recursive: true, force: true });
+      }
     }
 
     const templateName = isPrisma ? 'orm-prisma' : 'orm-drizzle';
     const srcDir = join(__dirname, '..', 'templates', templateName);
-    copyTemplateDirDeep(srcDir, targetDir);
+    if (!existsSync(srcDir)) {
+      log.warn(`ORM template not found: ${srcDir}`);
+    } else {
+      copyTemplateDirDeep(srcDir, targetDir);
+    }
 
     s.stop(`${label} configured`);
+    return { failed: false };
   } catch (err) {
     s.stop(`${label} configuration failed`);
     const msg = err instanceof Error ? err.message : String(err);
     log.error(`ORM setup failed: ${msg}`);
+    return { failed: true, error: msg };
   }
 }
 
-function showSuccessScreen(opts: { installed: number; failed: number; elapsedSeconds: number }): void {
+function showSuccessScreen(opts: {
+  installed: number;
+  failed: number;
+  elapsedSeconds: number;
+}): void {
   const { installed, failed, elapsedSeconds } = opts;
 
   const plural = installed !== 1 ? 's' : '';
-  note(
-    `${installed} module${plural} installed in ${elapsedSeconds}s`,
-    'Setup Summary'
-  );
+  note(`${installed} module${plural} installed in ${elapsedSeconds}s`, 'Setup Summary');
 
-  note(
-    `1. git push -u origin main\n2. gh secret set SONAR_TOKEN\n3. npm run dev`,
-    "What's next"
-  );
+  note(`1. git push -u origin main\n2. gh secret set SONAR_TOKEN\n3. npm run dev`, "What's next");
 
   note(
     `When CI fails → run /fix-issue <num> in Claude Code → AI opens a fix PR`,
@@ -283,7 +316,9 @@ function showSuccessScreen(opts: { installed: number; failed: number; elapsedSec
   );
 
   if (failed > 0) {
-    outro(`Done — but ${failed} module${failed !== 1 ? 's' : ''} failed. See above for fix commands.`);
+    outro(
+      `Done — but ${failed} module${failed !== 1 ? 's' : ''} failed. See above for fix commands.`
+    );
   } else {
     outro(`You're all set. Happy building! 🚀`);
   }
@@ -292,7 +327,7 @@ function showSuccessScreen(opts: { installed: number; failed: number; elapsedSec
 export async function runInstaller(
   selections: UserSelections,
   yesMode: boolean,
-  targetDir: string = process.cwd(),
+  targetDir: string = process.cwd()
 ): Promise<void> {
   // Read config from targetDir (not process.cwd())
   let config: TemplateConfig | null;
@@ -313,7 +348,7 @@ export async function runInstaller(
       wizardVersion: '1.0.0',
       aiMethodology: selections.aiMethodology,
       agenticSystem: selections.agenticSystem,
-      modules: selections.selectedModules.map(id => ({ id, installState: 'pending' as const })),
+      modules: selections.selectedModules.map((id) => ({ id, installState: 'pending' as const })),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -329,7 +364,7 @@ export async function runInstaller(
   const errors: Array<{ label: string; msg: string; devDeps: string[] }> = [];
 
   for (const moduleId of selections.selectedModules) {
-    const record = config.modules.find(m => m.id === moduleId);
+    const record = config.modules.find((m) => m.id === moduleId);
     if (record?.installState === 'installed') continue; // idempotency guard
 
     const mod = MODULE_REGISTRY[moduleId as keyof typeof MODULE_REGISTRY];
@@ -337,19 +372,20 @@ export async function runInstaller(
 
     // Extract major version from first devDep for display (e.g. "husky@^9.1.7" → "v9")
     // Uses .at(-1) to handle scoped packages (e.g. "@scope/pkg@^1.0.0" → last segment)
-    const versionDisplay = mod.devDeps.length > 0
-      ? (() => {
-          const segments = mod.devDeps[0]?.split('@') ?? [];
-          // For scoped packages "@scope/pkg@^1.0.0", split('@') = ['', 'scope/pkg', '^1.0.0']
-          // For plain "husky@^9.1.7", split('@') = ['husky', '^9.1.7']
-          // Take last segment only if it looks like a version (starts with digit or semver range char)
-          const lastSegment = segments.at(-1) ?? '';
-          const looksLikeVersion = /^[\^~>=<\d]/.test(lastSegment) && /\d/.test(lastSegment);
-          const raw = looksLikeVersion ? lastSegment : '';
-          const major = raw.replace(/[^0-9]/g, '').charAt(0);
-          return major ? `v${major}` : '';
-        })()
-      : '';
+    const versionDisplay =
+      mod.devDeps.length > 0
+        ? (() => {
+            const segments = mod.devDeps[0]?.split('@') ?? [];
+            // For scoped packages "@scope/pkg@^1.0.0", split('@') = ['', 'scope/pkg', '^1.0.0']
+            // For plain "husky@^9.1.7", split('@') = ['husky', '^9.1.7']
+            // Take last segment only if it looks like a version (starts with digit or semver range char)
+            const lastSegment = segments.at(-1) ?? '';
+            const looksLikeVersion = /^[\^~>=<\d]/.test(lastSegment) && /\d/.test(lastSegment);
+            const raw = looksLikeVersion ? lastSegment : '';
+            const major = raw.replace(/[^0-9]/g, '').charAt(0);
+            return major ? `v${major}` : '';
+          })()
+        : '';
 
     const s = spinner();
     s.start(`Installing ${mod.label}${versionDisplay ? ` ${versionDisplay}` : ''}...`);
@@ -402,11 +438,13 @@ export async function runInstaller(
   }
 
   // Auth and ORM setup — runs after module loop, before outro()
-  await runAuthSetup(selections, targetDir);
-  await runOrmSetup(selections, targetDir);
+  const authResult = await runAuthSetup(selections, targetDir);
+  const ormResult = await runOrmSetup(selections, targetDir);
 
-  const installed = results.filter(r => r.status === 'installed').length;
-  const failed = errors.length; // use errors[] as authoritative source to stay in sync with display
+  const installed = results.filter((r) => r.status === 'installed').length;
+  const moduleErrors = errors.length;
+  const setupErrors = [authResult, ormResult].filter((r) => r.failed).length;
+  const failed = moduleErrors + setupErrors;
   const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
   showSuccessScreen({ installed, failed, elapsedSeconds });
 }
