@@ -1,0 +1,21 @@
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/workflows/**'
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file: 'src/app/**'
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file: 'src/lib/**'
+
+database:
+  - changed-files:
+      - any-glob-to-any-file: 'prisma/**'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '*.md'

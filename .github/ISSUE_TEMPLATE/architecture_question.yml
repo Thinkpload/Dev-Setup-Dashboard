@@ -1,0 +1,37 @@
+name: Architecture Question
+description: Ask about architectural decisions or design choices — consider GitHub Discussions for open-ended conversations
+labels: ['question']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For open-ended architectural discussions, consider using [GitHub Discussions](../../discussions) instead of an issue.
+
+        **Related ADRs** (Architecture Decision Records) are in [`docs/decisions/`](../../tree/main/docs/decisions/):
+        - ADR-001: Contribution model
+        - ADR-002: Auth strategy (Better Auth vs Clerk)
+        - ADR-003: ORM strategy (Prisma vs Drizzle)
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What architectural decision or design choice are you asking about?
+    validations:
+      required: true
+
+  - type: input
+    id: related-adr
+    attributes:
+      label: Related ADR (if any)
+      description: e.g. ADR-002
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to accomplish? What have you already tried or read?
+    validations:
+      required: false

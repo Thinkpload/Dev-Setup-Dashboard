@@ -1,0 +1,14 @@
+# CODEOWNERS — auto-assigns PR reviewers based on changed files
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for all files
+* @Thinkpload
+
+# GitHub Actions workflows — require maintainer review
+/.github/workflows/ @Thinkpload
+
+# Source code
+/src/ @Thinkpload
+
+# Protect CODEOWNERS itself
+/.github/CODEOWNERS @Thinkpload
