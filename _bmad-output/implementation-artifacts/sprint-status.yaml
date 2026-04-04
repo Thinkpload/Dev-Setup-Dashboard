@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-22
-last_updated: 2026-04-02 # story 5.2 review
+last_updated: 2026-04-04 # story 6.3 review
 project: '!Template_BMAD+auto-CI-CD'
 project_key: NOKEY
 tracking_system: file-system
@@ -82,10 +82,10 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6: Governance & Community Infrastructure
-  epic-6: backlog
-  6-1-contributing-md-and-issue-templates: backlog
-  6-2-codeowners-and-pr-automation: backlog
-  6-3-adr-templates-and-github-discussions: backlog
+  epic-6: in-progress
+  6-1-contributing-md-and-issue-templates: review # implemented 2026-04-04
+  6-2-codeowners-and-pr-automation: review # implemented 2026-04-04
+  6-3-adr-templates-and-github-discussions: review # implemented 2026-04-04
   epic-6-retrospective: optional
 
   # Epic 7: Evergreen Update System
