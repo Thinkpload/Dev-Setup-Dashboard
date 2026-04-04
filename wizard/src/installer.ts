@@ -66,8 +66,8 @@ function npmInstallDevDeps(packages: string[], cwd: string): void {
     encoding: 'utf-8',
   });
   if (result.error) throw result.error;
-  if (result.status !== 0 && result.status !== null) {
-    throw new Error(result.stderr ?? `npm install exited with code ${result.status}`);
+  if (result.status !== 0) {
+    throw new Error(result.stderr || `npm install exited with code ${result.status}`);
   }
 }
 
@@ -79,8 +79,8 @@ function npmInstallDeps(packages: string[], cwd: string): void {
     encoding: 'utf-8',
   });
   if (result.error) throw result.error;
-  if (result.status !== 0 && result.status !== null) {
-    throw new Error(result.stderr ?? `npm install exited with code ${result.status}`);
+  if (result.status !== 0) {
+    throw new Error(result.stderr || `npm install exited with code ${result.status}`);
   }
 }
 
@@ -232,10 +232,9 @@ async function runAuthSetup(
     const templateName = isClerk ? 'auth-clerk' : 'auth-better-auth';
     const srcDir = join(__dirname, '..', 'templates', templateName);
     if (!existsSync(srcDir)) {
-      log.warn(`Auth template not found: ${srcDir}`);
-    } else {
-      copyTemplateDirDeep(srcDir, targetDir);
+      throw new Error(`Auth template not found: ${srcDir}`);
     }
+    copyTemplateDirDeep(srcDir, targetDir);
 
     s.stop(`${label} configured`);
     return { failed: false };
@@ -259,33 +258,27 @@ async function runOrmSetup(
     if (isPrisma) {
       npmInstallDevDeps([`prisma@${PRISMA_VERSION}`], targetDir);
       npmInstallDeps([`@prisma/client@${PRISMA_CLIENT_VERSION}`], targetDir);
-      const drizzleDir = join(targetDir, 'drizzle');
-      if (existsSync(drizzleDir)) {
-        const files = readdirSync(drizzleDir);
-        if (files.length > 0 && files[0] !== '.gitkeep') {
-          log.warn(`Removing non-empty drizzle/ directory — will be replaced by Prisma`);
-        }
-        rmSync(drizzleDir, { recursive: true, force: true });
-      }
     } else {
       npmInstallDeps([`drizzle-orm@${DRIZZLE_ORM_VERSION}`], targetDir);
       npmInstallDevDeps([`drizzle-kit@${DRIZZLE_KIT_VERSION}`], targetDir);
-      const prismaDir = join(targetDir, 'prisma');
-      if (existsSync(prismaDir)) {
-        const files = readdirSync(prismaDir);
-        if (files.length > 0 && files[0] !== '.gitkeep') {
-          log.warn(`Removing non-empty prisma/ directory — will be replaced by Drizzle`);
-        }
-        rmSync(prismaDir, { recursive: true, force: true });
-      }
     }
 
     const templateName = isPrisma ? 'orm-prisma' : 'orm-drizzle';
     const srcDir = join(__dirname, '..', 'templates', templateName);
     if (!existsSync(srcDir)) {
-      log.warn(`ORM template not found: ${srcDir}`);
-    } else {
-      copyTemplateDirDeep(srcDir, targetDir);
+      throw new Error(`ORM template not found: ${srcDir}`);
+    }
+    copyTemplateDirDeep(srcDir, targetDir);
+
+    // Delete unchosen ORM directory AFTER template copy succeeds
+    const dirToRemove = isPrisma ? join(targetDir, 'drizzle') : join(targetDir, 'prisma');
+    if (existsSync(dirToRemove)) {
+      const files = readdirSync(dirToRemove);
+      if (files.some((f) => f !== '.gitkeep')) {
+        const dirName = isPrisma ? 'drizzle' : 'prisma';
+        log.warn(`Removing non-empty ${dirName}/ directory — replaced by ${label}`);
+      }
+      rmSync(dirToRemove, { recursive: true, force: true });
     }
 
     s.stop(`${label} configured`);
