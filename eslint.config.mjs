@@ -12,7 +12,8 @@ const compat = new FlatCompat({
 const config = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
-    ignores: ['node_modules/**', '.next/**', 'wizard/**', 'drizzle/**'],
+    // scripts/*.js are plain CJS Node scripts (require/module.exports) — exempt from ESM rules
+    ignores: ['node_modules/**', '.next/**', 'wizard/**', 'drizzle/**', 'scripts/*.js'],
   },
 ];
 

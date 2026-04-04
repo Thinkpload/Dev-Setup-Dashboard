@@ -16,6 +16,7 @@
     "type-check": "tsc --noEmit",
     "db:seed": "tsx prisma/seed.ts",
     "template:update": "node scripts/template-update.js",
+    "compat:check": "node scripts/compat-check.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "prepare": "husky"
   },
