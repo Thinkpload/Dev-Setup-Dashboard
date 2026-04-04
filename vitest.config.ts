@@ -15,6 +15,11 @@ export default defineConfig({
     setupFiles: ['./src/test-setup.ts'],
     include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.ts'],
     exclude: ['node_modules', '.next', 'wizard/**', 'e2e/**'],
+    // Resolve conditional exports under the 'node' condition — required for packages
+    // like @sentry/nextjs that don't have a default/browser export at package root
+    resolve: {
+      conditions: ['node', 'require', 'default'],
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],

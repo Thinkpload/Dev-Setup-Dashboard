@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-22
-last_updated: 2026-04-04 # story 8-2 review
+last_updated: 2026-04-04 # story 8-3 review
 project: '!Template_BMAD+auto-CI-CD'
 project_key: NOKEY
 tracking_system: file-system
@@ -99,5 +99,5 @@ development_status:
   epic-8: in-progress
   8-1-bmad-agent-integration-verification: review # implemented 2026-04-04
   8-2-upstash-redis-rate-limiting-stub: review # implemented 2026-04-04
-  8-3-optional-integration-stubs-sentry-inngest-ai-providers: in-progress
+  8-3-optional-integration-stubs-sentry-inngest-ai-providers: review # implemented 2026-04-04
   epic-8-retrospective: optional

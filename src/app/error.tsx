@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Sentry } from '@/lib/sentry';
 
 export default function ErrorPage({
   error,
@@ -10,6 +12,10 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <Card className="max-w-md w-full text-center" role="alert" aria-live="assertive">
