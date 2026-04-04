@@ -1,6 +1,6 @@
 {
   "type": "commonjs",
   "dependencies": {
-    "@kilocode/plugin": "7.1.19"
+    "@kilocode/plugin": "7.1.20"
   }
 }
