@@ -192,6 +192,8 @@ npm run template:update
 - **MINOR versions:** always backward-compatible (your `src/` is never touched)
 - **MAJOR versions:** migration guide provided, previous version tagged for rollback
 
+See the full guide: [docs/guides/template-update.md](docs/guides/template-update.md)
+
 ---
 
 ## Deployment
