@@ -13,6 +13,7 @@
 const CHANGELOG_TYPES = {
   feat: 'Features',
   fix: 'Bug Fixes',
+  security: 'Security',
   perf: 'Performance Improvements',
   revert: 'Reverts',
   docs: 'Documentation',
@@ -69,6 +70,7 @@ function extractBreakingChange(fullCommitText) {
  */
 function groupCommitsBySection(commits) {
   const breakingChanges = [];
+  const securityFixes = [];
   const sections = {};
 
   for (const commit of commits) {
@@ -79,6 +81,17 @@ function groupCommitsBySection(commits) {
       breakingChanges.push(desc);
     }
 
+    // Security commits: explicit `security:` type OR `fix(security):` scope
+    const isSecurityCommit =
+      commit.type === 'security' || (commit.type === 'fix' && commit.scope === 'security');
+
+    if (isSecurityCommit) {
+      const entry = commit.subject;
+      securityFixes.push(entry);
+      // Do not also add to regular sections — security section is authoritative
+      continue;
+    }
+
     const sectionName = CHANGELOG_TYPES[commit.type];
     if (sectionName) {
       if (!sections[sectionName]) sections[sectionName] = [];
@@ -87,7 +100,7 @@ function groupCommitsBySection(commits) {
     }
   }
 
-  return { breakingChanges, sections };
+  return { breakingChanges, securityFixes, sections };
 }
 
 /**
@@ -105,6 +118,15 @@ function generateChangelogMarkdown(version, date, grouped) {
     lines.push('### ⚠ BREAKING CHANGES', '');
     for (const bc of grouped.breakingChanges) {
       lines.push(`* ${bc}`);
+    }
+    lines.push('');
+  }
+
+  // Security section rendered immediately after BREAKING CHANGES, before Features
+  if (grouped.securityFixes && grouped.securityFixes.length > 0) {
+    lines.push('### Security', '');
+    for (const fix of grouped.securityFixes) {
+      lines.push(`* ${fix}`);
     }
     lines.push('');
   }

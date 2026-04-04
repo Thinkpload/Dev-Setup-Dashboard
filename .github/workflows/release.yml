@@ -40,11 +40,15 @@ jobs:
           git diff --staged --quiet || git commit -m "chore(release): update CHANGELOG for ${{ github.ref_name }}"
           git push origin HEAD:main
 
+      - name: Extract latest CHANGELOG entry
+        run: |
+          awk '/^## \[/{found++} found==1{print} found==2{exit}' CHANGELOG.md > /tmp/release-notes.md
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create ${{ github.ref_name }} \
             --title "Release ${{ github.ref_name }}" \
-            --generate-notes \
+            --notes-file /tmp/release-notes.md \
             --latest

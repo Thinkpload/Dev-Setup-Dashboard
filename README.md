@@ -115,9 +115,9 @@ CI fails → GitHub Issue created (job + error log + SHA + branch)
 
 ---
 
-## BMAD Agent Workflows
+## BMAD AI Agents
 
-All 8 BMAD agents are available as slash commands immediately after cloning (no setup required):
+All 8 BMAD agents are available as slash commands immediately after cloning — no setup required:
 
 | Agent        | Slash Command       | Role                       |
 | ------------ | ------------------- | -------------------------- |
@@ -129,6 +129,16 @@ All 8 BMAD agents are available as slash commands immediately after cloning (no 
 | QA           | `/bmad-qa`          | Testing strategy           |
 | Scrum Master | `/bmad-sm`          | Sprint planning            |
 | Tech Writer  | `/bmad-tech-writer` | Documentation              |
+
+**Config auto-detection:** Each agent reads project context from `_bmad/bmm/config.yaml` (checked into the repo). No manual configuration needed after cloning.
+
+**Team consistency:** Because `_bmad/bmm/config.yaml` is shared via version control, all developers on the same team get identical agent behaviour — same architecture patterns, same reasoning, same project context.
+
+To verify all agents are present after cloning:
+
+```bash
+npm run verify:bmad
+```
 
 ---
 
@@ -209,6 +219,25 @@ Set `DATABASE_URL` to your Neon PostgreSQL connection string in Vercel environme
 See `docs/guides/deployment.md` for step-by-step guides.
 
 ---
+
+## Releasing
+
+Maintainers can publish a new release in three steps:
+
+```bash
+# Patch release (bug fixes only)
+npm run release:patch
+
+# Minor release (new features, backward compatible)
+npm run release:minor
+
+# Major release (breaking changes — prepare migration guide first)
+npm run release:major
+```
+
+Each command bumps the version in `package.json`, pushes the commit, and pushes the tag. The `release.yml` workflow then auto-generates `CHANGELOG.md` and creates a GitHub Release with the changelog as release notes.
+
+See [docs/guides/release-process.md](docs/guides/release-process.md) for the full weekly release checklist.
 
 ## Contributing
 

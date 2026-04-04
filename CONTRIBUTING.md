@@ -136,3 +136,16 @@ The publish workflow (`.github/workflows/publish.yml`) requires an `NPM_TOKEN` r
 ### OIDC upgrade path
 
 npm trusted publishing (OIDC) eliminates the need for a long-lived `NPM_TOKEN` entirely. Once ready, configure a trusted publisher at npmjs.com → package → Settings → Trusted Publishers, then update `publish.yml` to use `id-token: write` permissions and remove the `NODE_AUTH_TOKEN` env var. See the comment in `publish.yml` for details.
+
+## Releasing
+
+Maintainers with write access can publish new template releases. See the full weekly checklist in
+[docs/guides/release-process.md](docs/guides/release-process.md).
+
+Quick reference:
+
+```bash
+npm run release:patch   # bug fixes
+npm run release:minor   # new features (backward compatible)
+npm run release:major   # breaking changes (requires migration guide)
+```

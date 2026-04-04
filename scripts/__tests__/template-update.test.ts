@@ -263,3 +263,138 @@ describe('compat-check integration', () => {
     expect(existsSync(scriptPath)).toBe(true);
   });
 });
+
+// ─── changelog-utils: groupCommitsBySection — Security ───────────────────────
+
+import { groupCommitsBySection, generateChangelogMarkdown } from '../changelog-utils.js';
+
+describe('groupCommitsBySection — security commits', () => {
+  it('places fix(security): commit in securityFixes, not in Bug Fixes section', () => {
+    const commits = [
+      { type: 'fix', scope: 'security', subject: 'patch XSS in form handler', breaking: false },
+    ];
+    const result = groupCommitsBySection(commits);
+    expect(result.securityFixes).toEqual(['patch XSS in form handler']);
+    expect(result.sections['Bug Fixes']).toBeUndefined();
+  });
+
+  it('places security: commit in securityFixes', () => {
+    const commits = [
+      { type: 'security', scope: null, subject: 'update dependency with CVE', breaking: false },
+    ];
+    const result = groupCommitsBySection(commits);
+    expect(result.securityFixes).toEqual(['update dependency with CVE']);
+    expect(result.sections['Security']).toBeUndefined(); // security type uses securityFixes, not sections
+  });
+
+  it('does NOT place regular fix: commit in securityFixes', () => {
+    const commits = [
+      { type: 'fix', scope: null, subject: 'fix button alignment', breaking: false },
+    ];
+    const result = groupCommitsBySection(commits);
+    expect(result.securityFixes).toEqual([]);
+    expect(result.sections['Bug Fixes']).toEqual(['fix button alignment']);
+  });
+
+  it('does NOT place fix with non-security scope in securityFixes', () => {
+    const commits = [{ type: 'fix', scope: 'auth', subject: 'fix token refresh', breaking: false }];
+    const result = groupCommitsBySection(commits);
+    expect(result.securityFixes).toEqual([]);
+    expect(result.sections['Bug Fixes']).toEqual(['**auth:** fix token refresh']);
+  });
+
+  it('handles mixed commits: security and non-security together', () => {
+    const commits = [
+      { type: 'fix', scope: 'security', subject: 'sanitize input', breaking: false },
+      { type: 'feat', scope: null, subject: 'add dark mode', breaking: false },
+      { type: 'fix', scope: null, subject: 'fix typo', breaking: false },
+    ];
+    const result = groupCommitsBySection(commits);
+    expect(result.securityFixes).toEqual(['sanitize input']);
+    expect(result.sections['Features']).toEqual(['add dark mode']);
+    expect(result.sections['Bug Fixes']).toEqual(['fix typo']);
+  });
+
+  it('returns empty securityFixes array when no security commits', () => {
+    const commits = [{ type: 'feat', scope: null, subject: 'new feature', breaking: false }];
+    const result = groupCommitsBySection(commits);
+    expect(result.securityFixes).toEqual([]);
+  });
+
+  it('handles empty commits array', () => {
+    const result = groupCommitsBySection([]);
+    expect(result.securityFixes).toEqual([]);
+    expect(result.breakingChanges).toEqual([]);
+    expect(result.sections).toEqual({});
+  });
+});
+
+// ─── changelog-utils: generateChangelogMarkdown — Security section order ──────
+
+describe('generateChangelogMarkdown — Security section ordering', () => {
+  it('renders Security section before Features when security fixes present', () => {
+    const grouped = {
+      breakingChanges: [],
+      securityFixes: ['patch XSS vulnerability'],
+      sections: { Features: ['add dark mode'], 'Bug Fixes': ['fix typo'] },
+    };
+    const md = generateChangelogMarkdown('1.2.0', '2026-04-04', grouped);
+    const securityPos = md.indexOf('### Security');
+    const featuresPos = md.indexOf('### Features');
+    expect(securityPos).toBeGreaterThan(-1);
+    expect(featuresPos).toBeGreaterThan(-1);
+    expect(securityPos).toBeLessThan(featuresPos);
+  });
+
+  it('renders Security section after BREAKING CHANGES', () => {
+    const grouped = {
+      breakingChanges: ['removed legacy API'],
+      securityFixes: ['patch injection flaw'],
+      sections: {},
+    };
+    const md = generateChangelogMarkdown('2.0.0', '2026-04-04', grouped);
+    const breakingPos = md.indexOf('### ⚠ BREAKING CHANGES');
+    const securityPos = md.indexOf('### Security');
+    expect(breakingPos).toBeLessThan(securityPos);
+  });
+
+  it('omits Security section when no security fixes', () => {
+    const grouped = {
+      breakingChanges: [],
+      securityFixes: [],
+      sections: { Features: ['add feature'] },
+    };
+    const md = generateChangelogMarkdown('1.1.0', '2026-04-04', grouped);
+    expect(md).not.toContain('### Security');
+  });
+
+  it('includes security fix entries as bullet points', () => {
+    const grouped = {
+      breakingChanges: [],
+      securityFixes: ['fix path traversal in upload handler'],
+      sections: {},
+    };
+    const md = generateChangelogMarkdown('1.0.1', '2026-04-04', grouped);
+    expect(md).toContain('* fix path traversal in upload handler');
+  });
+});
+
+// ─── Integration: npm run changelog ──────────────────────────────────────────
+
+describe('changelog integration', () => {
+  const repoRoot = path.resolve(__dirname, '..', '..');
+
+  it('npm run changelog exits 0 on current codebase', () => {
+    let exitCode = 0;
+    try {
+      execSync('npm run changelog', {
+        cwd: repoRoot,
+        stdio: 'pipe',
+        encoding: 'utf8',
+      });
+    } catch (err: unknown) {
+      exitCode = (err as NodeJS.ErrnoException & { status?: number }).status ?? 1;
+    }
+    expect(exitCode).toBe(0);
+  });
+});
