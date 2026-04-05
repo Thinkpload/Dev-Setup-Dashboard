@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Security Audit
+        run: npm audit --audit-level=high > audit.log 2>&1 || (cat audit.log && exit 1)
+
       - name: Lint
         run: npm run lint
 
