@@ -1,8 +1,14 @@
 import { GradientHero } from '@/components/features/GradientHero';
+import { AutopilotSection } from '@/components/features/AutopilotSection';
 import { FeatureCard } from '@/components/features/FeatureCard';
 import { Navbar } from '@/components/shared/Navbar';
 
 const FEATURES = [
+  {
+    icon: '⚡',
+    title: 'Autopilot Mode',
+    description: 'Claude Code works autonomously through BMAD phases with quality gates',
+  },
   {
     icon: '🤖',
     title: 'Auto-Bugfix Pipeline',
@@ -29,6 +35,9 @@ export default function HomePage() {
         {/* Hero */}
         <GradientHero ctaHref="https://github.com/mad-one/template-bmad-auto-cicd" />
 
+        {/* Autopilot spotlight */}
+        <AutopilotSection />
+
         {/* Features section */}
         <section
           id="features"
@@ -44,8 +53,8 @@ export default function HomePage() {
             </h2>
             <p className="mb-16 text-center text-purple-300">Stop configuring. Start building.</p>
 
-            {/* 3-up on desktop, 1-up on mobile */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* 2×2 on desktop, 1-up on mobile */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {FEATURES.map((feature) => (
                 <FeatureCard
                   key={feature.title}
