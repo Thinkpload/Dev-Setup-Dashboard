@@ -89,11 +89,10 @@ describe('runInstaller', () => {
   it('calls spawnSync with npm install --save-dev and devDeps for pending modules', async () => {
     const selections: UserSelections = { ...baseSelections, selectedModules: ['husky'] };
     await runInstaller(selections, true, tmpDir);
-    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     expect(spawnSync).toHaveBeenCalledWith(
-      npmCmd,
+      'npm',
       expect.arrayContaining(['install', '--save-dev']),
-      expect.objectContaining({ cwd: tmpDir })
+      expect.objectContaining({ cwd: tmpDir, shell: true })
     );
   });
 

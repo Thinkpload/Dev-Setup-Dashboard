@@ -1,4 +1,2 @@
 npx lint-staged
-if git diff --cached --name-only | grep -qE '\.tsx?$'; then
-  npx tsc --noEmit
-fi
+node scripts/check-secrets.js

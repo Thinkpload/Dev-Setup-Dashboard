@@ -4,10 +4,10 @@ import { mkdirSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-const SCRIPT_PATH = join(process.cwd(), 'scripts/check-secrets.sh');
+const SCRIPT_PATH = join(process.cwd(), 'scripts/check-secrets.js');
 
 /**
- * Helper: run check-secrets.sh in a temp git repo with specified staged files.
+ * Helper: run check-secrets.js in a temp git repo with specified staged files.
  * Returns { exitCode, stdout, stderr }.
  */
 function runSecretScan(stagedFiles: Array<{ name: string; content: string }>): {
@@ -34,7 +34,7 @@ function runSecretScan(stagedFiles: Array<{ name: string; content: string }>): {
     }
 
     // Run the script
-    const result = spawnSync('bash', [SCRIPT_PATH], {
+    const result = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: tmpDir,
       encoding: 'utf8',
     });
@@ -49,13 +49,13 @@ function runSecretScan(stagedFiles: Array<{ name: string; content: string }>): {
   }
 }
 
-describe('check-secrets.sh', () => {
+describe('check-secrets.js', () => {
   it('exits 0 when no files are staged', () => {
     const tmpDir = join(tmpdir(), `secret-scan-empty-${Date.now()}`);
     mkdirSync(tmpDir, { recursive: true });
     try {
       execSync('git init', { cwd: tmpDir, stdio: 'pipe' });
-      const result = spawnSync('bash', [SCRIPT_PATH], {
+      const result = spawnSync(process.execPath, [SCRIPT_PATH], {
         cwd: tmpDir,
         encoding: 'utf8',
       });
@@ -83,7 +83,7 @@ describe('check-secrets.sh', () => {
       },
     ]);
     expect(result.exitCode).toBe(1);
-    expect(result.stdout).toContain('Potential secret detected');
+    expect(result.stderr).toContain('Potential secret detected');
   });
 
   it('exits 1 when a .env.local file is staged', () => {
@@ -104,7 +104,7 @@ describe('check-secrets.sh', () => {
       },
     ]);
     expect(result.exitCode).toBe(1);
-    expect(result.stdout).toContain('Potential secret detected');
+    expect(result.stderr).toContain('Potential secret detected');
   });
 
   it('exits 1 when a file contains API_KEY= with a value', () => {
@@ -124,7 +124,6 @@ describe('check-secrets.sh', () => {
         content: '# Set SECRET_KEY in your environment\n',
       },
     ]);
-    // Pattern requires "KEY= value" — a comment without "=" assignment should pass
     expect(result.exitCode).toBe(0);
   });
 

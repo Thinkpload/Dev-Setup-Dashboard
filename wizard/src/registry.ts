@@ -17,7 +17,6 @@ import {
   VITEST_VERSION,
   VITEST_COVERAGE_V8_VERSION,
   TYPESCRIPT_VERSION,
-  BMAD_VERSION,
 } from './dependency-versions.js';
 import type { ModuleRegistry } from './types.js';
 
@@ -44,10 +43,7 @@ export const MODULE_REGISTRY: ModuleRegistry = {
     description: 'Static analysis with TypeScript-aware rules (eslint.config.mjs)',
     priority: 'must-have',
     deps: [],
-    devDeps: [
-      `eslint@${ESLINT_VERSION}`,
-      `typescript-eslint@${TYPESCRIPT_ESLINT_VERSION}`,
-    ],
+    devDeps: [`eslint@${ESLINT_VERSION}`, `typescript-eslint@${TYPESCRIPT_ESLINT_VERSION}`],
     templateDir: 'templates/eslint',
     postInstall: [],
     conflicts: [],
@@ -58,10 +54,7 @@ export const MODULE_REGISTRY: ModuleRegistry = {
     description: 'Unit/integration tests with lcov coverage output for SonarCloud',
     priority: 'must-have',
     deps: [],
-    devDeps: [
-      `vitest@${VITEST_VERSION}`,
-      `@vitest/coverage-v8@${VITEST_COVERAGE_V8_VERSION}`,
-    ],
+    devDeps: [`vitest@${VITEST_VERSION}`, `@vitest/coverage-v8@${VITEST_COVERAGE_V8_VERSION}`],
     templateDir: 'templates/vitest',
     postInstall: [],
     conflicts: [],
@@ -72,9 +65,7 @@ export const MODULE_REGISTRY: ModuleRegistry = {
     description: 'tsconfig.json with strict mode, noUncheckedIndexedAccess, and @/* path alias',
     priority: 'must-have',
     deps: [],
-    devDeps: [
-      `typescript@${TYPESCRIPT_VERSION}`,
-    ],
+    devDeps: [`typescript@${TYPESCRIPT_VERSION}`],
     templateDir: 'templates/tsconfig',
     postInstall: [],
     conflicts: [],
@@ -85,11 +76,9 @@ export const MODULE_REGISTRY: ModuleRegistry = {
     description: 'AI-driven development methodology — installs agent configs and personas',
     priority: 'should-have',
     deps: [],
-    devDeps: [
-      `@bmad-method/bmad-agent@${BMAD_VERSION}`,
-    ],
+    devDeps: [],
     templateDir: 'templates/bmad',
-    postInstall: ['npx bmad-method install'],
+    postInstall: [],
     conflicts: [],
   },
   gsd: {

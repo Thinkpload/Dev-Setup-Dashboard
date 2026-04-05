@@ -7,13 +7,11 @@ import {
   mkdirSync,
   readdirSync,
   chmodSync,
-  statSync,
   rmSync,
 } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join } from 'node:path';
 import { spinner, outro, note, log } from '@clack/prompts';
 import { MODULE_REGISTRY } from './registry.js';
-import { readConfig, writeConfig } from './config.js';
 import type { UserSelections, TemplateConfig } from './types.js';
 import {
   BETTER_AUTH_VERSION,
@@ -59,11 +57,11 @@ export function mergePackageJson(pkgPath: string, additions: PackageJsonAddition
 }
 
 function npmInstallDevDeps(packages: string[], cwd: string): void {
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const result = spawnSync(npmCmd, ['install', '--save-dev', ...packages], {
+  const result = spawnSync('npm', ['install', '--save-dev', ...packages], {
     cwd,
     stdio: 'pipe',
     encoding: 'utf-8',
+    shell: true,
   });
   if (result.error) throw result.error;
   if (result.status !== 0) {
@@ -72,11 +70,11 @@ function npmInstallDevDeps(packages: string[], cwd: string): void {
 }
 
 function npmInstallDeps(packages: string[], cwd: string): void {
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const result = spawnSync(npmCmd, ['install', ...packages], {
+  const result = spawnSync('npm', ['install', ...packages], {
     cwd,
     stdio: 'pipe',
     encoding: 'utf-8',
+    shell: true,
   });
   if (result.error) throw result.error;
   if (result.status !== 0) {
@@ -99,7 +97,7 @@ function copyWithBackup(src: string, dest: string): void {
   copyFileSync(src, dest);
 }
 
-function copyTemplateDir(templateRelPath: string, destDir: string, _yesMode: boolean): void {
+function copyTemplateDir(templateRelPath: string, destDir: string): void {
   // CJS: __dirname resolves to wizard/src at runtime in dist, but we need wizard/ root
   // templateRelPath is relative to wizard/ root (e.g. 'templates/husky')
   const srcDir = join(__dirname, '..', templateRelPath);
@@ -392,7 +390,7 @@ export async function runInstaller(
       // 2. copy template files
       // For husky: the hook files live in templates/husky/.husky/ and should go to targetDir/.husky/
       // The copyTemplateDir call puts them in destDir, we pass targetDir so subdirs work correctly
-      copyTemplateDir(mod.templateDir, targetDir, yesMode);
+      copyTemplateDir(mod.templateDir, targetDir);
 
       // 3. package.json merge
       const pkgPath = join(targetDir, 'package.json');

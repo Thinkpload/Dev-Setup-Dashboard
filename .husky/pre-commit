@@ -1,2 +1,2 @@
 npx lint-staged
-bash scripts/check-secrets.sh
+node scripts/check-secrets.js

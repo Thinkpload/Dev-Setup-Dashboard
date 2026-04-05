@@ -60,7 +60,7 @@ export const COMMITLINT_CONVENTIONAL_VERSION = '^19.6.0';
 export const ESLINT_VERSION = '^9.19.0';
 
 /** typescript-eslint — TypeScript-aware ESLint rules */
-export const TYPESCRIPT_ESLINT_VERSION = '^8.23.0';
+export const TYPESCRIPT_ESLINT_VERSION = '^8.58.0';
 
 // ─── Testing ────────────────────────────────────────────────────────────────
 

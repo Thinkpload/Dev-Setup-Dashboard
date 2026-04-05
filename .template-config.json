@@ -1,33 +1,35 @@
 {
   "wizardVersion": "0.1.0",
-  "aiMethodology": "both",
+  "aiMethodology": "bmad",
   "agenticSystem": "claude-code",
+  "authProvider": "better-auth",
+  "ormChoice": "prisma",
   "modules": [
-    {
-      "id": "husky",
-      "installState": "failed"
-    },
-    {
-      "id": "eslint",
-      "installState": "failed"
-    },
-    {
-      "id": "vitest",
-      "installState": "failed"
-    },
-    {
-      "id": "tsconfig",
-      "installState": "failed"
-    },
     {
       "id": "gsd",
       "installState": "installed"
     },
     {
+      "id": "husky",
+      "installState": "installed"
+    },
+    {
+      "id": "vitest",
+      "installState": "installed"
+    },
+    {
+      "id": "tsconfig",
+      "installState": "installed"
+    },
+    {
+      "id": "eslint",
+      "installState": "installed"
+    },
+    {
       "id": "bmad",
-      "installState": "failed"
+      "installState": "installed"
     }
   ],
   "createdAt": "2026-03-15T22:18:02.060Z",
-  "updatedAt": "2026-03-15T22:18:02.060Z"
+  "updatedAt": "2026-04-05T13:37:43.499Z"
 }

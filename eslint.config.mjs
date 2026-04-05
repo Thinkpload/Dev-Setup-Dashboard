@@ -1,20 +1,12 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
+// Compatible with eslint ^9.19.0 and typescript-eslint ^8.23.0
+// Review if major version bumps change flat config API
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import globals from 'globals';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const config = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
-  {
-    // scripts/*.js are plain CJS Node scripts (require/module.exports) — exempt from ESM rules
-    ignores: ['node_modules/**', '.next/**', 'wizard/**', 'drizzle/**', 'scripts/*.js'],
+export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.recommended, {
+  files: ['scripts/**/*.js', 'scripts/**/*.mjs', 'scripts/**/*.cjs'],
+  languageOptions: {
+    globals: globals.node,
   },
-];
-
-export default config;
+});

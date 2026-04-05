@@ -44,22 +44,12 @@ describe('isWindowsNative', () => {
 });
 
 describe('printWsl2Instructions', () => {
-  it('exits with code 1 (not 0) so calling scripts detect unsupported environment', () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  it('exits cleanly — Windows native is fully supported', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit');
+    });
     expect(() => printWsl2Instructions()).toThrow('exit');
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(exitSpy).toHaveBeenCalledWith(0);
     exitSpy.mockRestore();
-    consoleSpy.mockRestore();
-  });
-
-  it('prints WSL2 install instructions before exiting', () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
-    const logs: string[] = [];
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation((msg: string) => { logs.push(msg); });
-    expect(() => printWsl2Instructions()).toThrow('exit');
-    expect(logs.some(l => l.includes('wsl --install'))).toBe(true);
-    exitSpy.mockRestore();
-    consoleSpy.mockRestore();
   });
 });

@@ -2,7 +2,26 @@
   "name": "create-ai-template",
   "version": "0.1.0",
   "description": "Interactive CLI wizard for setting up an AI-driven development environment",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Thinkpload/Template-BMAD-auto-CI-CD"
+  },
+  "keywords": [
+    "cli",
+    "template",
+    "ai",
+    "bmad",
+    "nextjs",
+    "ci-cd",
+    "scaffold"
+  ],
   "type": "commonjs",
+  "files": [
+    "dist",
+    "templates",
+    "package.json"
+  ],
   "bin": {
     "create-ai-template": "./dist/index.cjs"
   },
