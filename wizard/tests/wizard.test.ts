@@ -26,11 +26,18 @@ describe('runWizard', () => {
     vi.mocked(clack.isCancel).mockReturnValue(false);
     // Default: 4 selects — aiMethodology, agenticSystem, authProvider, ormChoice
     vi.mocked(clack.select)
-      .mockResolvedValueOnce('both')       // Q1: aiMethodology
+      .mockResolvedValueOnce('both') // Q1: aiMethodology
       .mockResolvedValueOnce('claude-code') // Q2: agenticSystem
       .mockResolvedValueOnce('better-auth') // Q3: authProvider
-      .mockResolvedValueOnce('prisma');     // Q4: ormChoice
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint', 'husky', 'vitest', 'tsconfig', 'bmad', 'gsd']);
+      .mockResolvedValueOnce('prisma'); // Q4: ormChoice
+    vi.mocked(clack.multiselect).mockResolvedValue([
+      'eslint',
+      'husky',
+      'vitest',
+      'tsconfig',
+      'bmad',
+      'gsd',
+    ]);
     vi.mocked(readConfig).mockReturnValue(null);
   });
 
@@ -72,7 +79,7 @@ describe('runWizard', () => {
       options?: { value: string; label: string }[];
     };
     expect(q3Call).toBeDefined();
-    const values = (q3Call.options ?? []).map(o => o.value);
+    const values = (q3Call.options ?? []).map((o) => o.value);
     expect(values).toContain('better-auth');
     expect(values).toContain('clerk');
   });
@@ -85,7 +92,7 @@ describe('runWizard', () => {
       options?: { value: string; label: string }[];
     };
     expect(q4Call).toBeDefined();
-    const values = (q4Call.options ?? []).map(o => o.value);
+    const values = (q4Call.options ?? []).map((o) => o.value);
     expect(values).toContain('prisma');
     expect(values).toContain('drizzle');
   });
@@ -106,7 +113,7 @@ describe('runWizard', () => {
       options?: { value: string; label: string }[];
     };
     expect(q1Call).toBeDefined();
-    const bothOption = (q1Call.options ?? []).find(o => o.value === 'both');
+    const bothOption = (q1Call.options ?? []).find((o) => o.value === 'both');
     expect(bothOption?.label).toContain('Recommended for most');
   });
 
@@ -117,7 +124,7 @@ describe('runWizard', () => {
       options?: { value: string; label: string }[];
     };
     expect(q2Call).toBeDefined();
-    const claudeOption = (q2Call.options ?? []).find(o => o.value === 'claude-code');
+    const claudeOption = (q2Call.options ?? []).find((o) => o.value === 'claude-code');
     expect(claudeOption?.label).toContain('Recommended for most');
   });
 
@@ -135,7 +142,9 @@ describe('runWizard', () => {
       .mockReturnValueOnce(false) // Q1
       .mockReturnValueOnce(false) // Q2
       .mockReturnValueOnce(true); // Q3 — cancel
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit');
+    });
     await expect(runWizard(false)).rejects.toThrow('exit');
     expect(clack.cancel).toHaveBeenCalled();
     expect(exitSpy).toHaveBeenCalledWith(0);
@@ -148,7 +157,9 @@ describe('runWizard', () => {
       .mockReturnValueOnce(false) // Q2
       .mockReturnValueOnce(false) // Q3
       .mockReturnValueOnce(true); // Q4 — cancel
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit');
+    });
     await expect(runWizard(false)).rejects.toThrow('exit');
     expect(clack.cancel).toHaveBeenCalled();
     expect(exitSpy).toHaveBeenCalledWith(0);
@@ -158,7 +169,9 @@ describe('runWizard', () => {
   it('must-have modules appear in initialValues of multiselect', async () => {
     vi.mocked(clack.multiselect).mockResolvedValue(['eslint', 'husky', 'vitest', 'tsconfig']);
     await runWizard(false);
-    const multiselectCall = vi.mocked(clack.multiselect).mock.calls[0]?.[0] as { initialValues?: string[] };
+    const multiselectCall = vi.mocked(clack.multiselect).mock.calls[0]?.[0] as {
+      initialValues?: string[];
+    };
     expect(multiselectCall).toBeDefined();
     const initialValues = multiselectCall.initialValues ?? [];
     expect(initialValues).toContain('eslint');
@@ -180,7 +193,9 @@ describe('runWizard', () => {
     });
     vi.mocked(clack.multiselect).mockResolvedValue(['husky']);
     await runWizard(false);
-    const multiselectCall = vi.mocked(clack.multiselect).mock.calls[0]?.[0] as { options?: { value: string }[] };
+    const multiselectCall = vi.mocked(clack.multiselect).mock.calls[0]?.[0] as {
+      options?: { value: string }[];
+    };
     expect(multiselectCall).toBeDefined();
     const optionValues = (multiselectCall.options ?? []).map((o) => o.value);
     expect(optionValues).not.toContain('eslint');
@@ -229,8 +244,10 @@ describe('--yes mode non-interactive defaults', () => {
     // Methodology modules (both = bmad + gsd)
     expect(result.selectedModules).toContain('bmad');
     expect(result.selectedModules).toContain('gsd');
-    // Total: exactly the above 6 modules, nothing more
-    expect(result.selectedModules).toHaveLength(6);
+    // claude-code agenticSystem adds autopilot pre-selected
+    expect(result.selectedModules).toContain('autopilot');
+    // Total: exactly the above 7 modules, nothing more
+    expect(result.selectedModules).toHaveLength(7);
   });
 
   it('--yes mode: no prompts shown — select and multiselect not called', async () => {
@@ -254,7 +271,7 @@ describe('NO_COLOR support', () => {
     await runWizard(true, '1.0.0');
     const introArg = vi.mocked(clack.intro).mock.calls[0]?.[0] as string;
     // In test env, process.stdout.isTTY is false → _useColor = false → no ANSI codes
-    expect(introArg).not.toMatch(/\x1b\[/);
+    expect(introArg).not.toMatch(/\x1b\[/); // eslint-disable-line no-control-regex
   });
 });
 
@@ -262,7 +279,10 @@ describe('validateConflicts', () => {
   it('given a pair of module IDs where one conflicts with the other, returns a non-empty array', () => {
     // All current MODULE_REGISTRY entries have empty conflicts arrays (AI-03 requirement).
     // Test the deduplication/conflict-detection logic using eslint+husky (no conflicts = empty array).
-    const noConflicts = validateConflicts(['eslint', 'husky'] as import('../src/types.js').ModuleId[]);
+    const noConflicts = validateConflicts([
+      'eslint',
+      'husky',
+    ] as import('../src/types.js').ModuleId[]);
     expect(noConflicts).toEqual([]);
     // Verify function signature: takes ModuleId[] and returns string[]
     const result = validateConflicts([] as import('../src/types.js').ModuleId[]);

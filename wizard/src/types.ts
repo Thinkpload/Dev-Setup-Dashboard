@@ -32,15 +32,14 @@ export interface ModuleDefinition {
    * Phase 2 wizard validates this before any installation begins.
    */
   conflicts?: string[];
+  /**
+   * When true, installer uses deep recursive copy instead of 2-level copyTemplateDir.
+   * Required for modules whose templates contain nested directories (e.g. .claude/rules/).
+   */
+  deepCopy?: boolean;
 }
 
-export type ModuleId =
-  | 'eslint'
-  | 'husky'
-  | 'vitest'
-  | 'tsconfig'
-  | 'bmad'
-  | 'gsd';
+export type ModuleId = 'eslint' | 'husky' | 'vitest' | 'tsconfig' | 'bmad' | 'gsd' | 'autopilot';
 
 export type ModuleRegistry = Record<ModuleId, ModuleDefinition>;
 

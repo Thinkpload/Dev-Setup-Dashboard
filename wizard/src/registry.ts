@@ -92,4 +92,17 @@ export const MODULE_REGISTRY: ModuleRegistry = {
     postInstall: [], // Phase 3 handles GSD activation logic (AI-02)
     conflicts: [],
   },
+  autopilot: {
+    id: 'autopilot',
+    label: 'Autopilot Mode (Claude Code)',
+    description:
+      'Claude Code works autonomously through BMAD/GSD phases with quality gates and self-correction',
+    priority: 'should-have',
+    deps: [],
+    devDeps: [], // Pure config files — no npm packages
+    templateDir: 'templates/autopilot',
+    postInstall: [],
+    conflicts: [],
+    deepCopy: true, // .claude/rules/ and .claude/commands/ require recursive copy
+  },
 } as const;

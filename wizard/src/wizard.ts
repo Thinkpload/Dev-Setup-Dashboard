@@ -1,11 +1,16 @@
 // wizard/src/wizard.ts — CJS package, no ESM-only APIs
 
-import {
-  intro, outro, select, multiselect, isCancel, cancel, log
-} from '@clack/prompts';
+import { intro, outro, select, multiselect, isCancel, cancel, log } from '@clack/prompts';
 import { MODULE_REGISTRY } from './registry.js';
 import { readConfig } from './config.js';
-import type { UserSelections, AiMethodology, AgenticSystem, AuthProvider, OrmChoice, ModuleId } from './types.js';
+import type {
+  UserSelections,
+  AiMethodology,
+  AgenticSystem,
+  AuthProvider,
+  OrmChoice,
+  ModuleId,
+} from './types.js';
 
 // Direction C: warm/orange aesthetic — approximated with ANSI yellow (closest terminal color)
 // Only apply ANSI codes when stdout is a TTY and NO_COLOR is not set.
@@ -21,15 +26,13 @@ export function validateConflicts(ids: ModuleId[]): string[] {
   for (const id of ids) {
     const def = MODULE_REGISTRY[id];
     if (!def) continue;
-    for (const cid of (def.conflicts ?? [])) {
+    for (const cid of def.conflicts ?? []) {
       if (ids.includes(cid as ModuleId)) {
         const key = [id, cid].sort().join('|');
         if (!seen.has(key)) {
           seen.add(key);
           const conflictDef = MODULE_REGISTRY[cid as ModuleId];
-          errors.push(
-            `"${def.label}" conflicts with "${conflictDef?.label ?? cid}"`
-          );
+          errors.push(`"${def.label}" conflicts with "${conflictDef?.label ?? cid}"`);
         }
       }
     }
@@ -38,12 +41,14 @@ export function validateConflicts(ids: ModuleId[]): string[] {
 }
 
 export async function runWizard(yesMode = false, version = ''): Promise<UserSelections> {
-  intro(`${BOLD}${ORANGE}✦ create-ai-template${RESET}${version ? ` v${version}` : ''}\n  AI-native dev environment: BMAD + GSD + CI/CD in one setup`);
+  intro(
+    `${BOLD}${ORANGE}✦ create-ai-template${RESET}${version ? ` v${version}` : ''}\n  AI-native dev environment: BMAD + GSD + CI/CD in one setup`
+  );
 
   const existingConfig = readConfig();
   const installedIds = (existingConfig?.modules ?? [])
-    .filter(m => m.installState === 'installed')
-    .map(m => m.id);
+    .filter((m) => m.installState === 'installed')
+    .map((m) => m.id);
 
   // Notify user about already-installed modules (neutral info, not warning)
   for (const id of installedIds) {
@@ -51,8 +56,9 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
     if (mod) log.info(`○ ${mod.label} already installed, skipping`);
   }
 
-  const availableModules = Object.values(MODULE_REGISTRY)
-    .filter(m => !installedIds.includes(m.id));
+  const availableModules = Object.values(MODULE_REGISTRY).filter(
+    (m) => !installedIds.includes(m.id)
+  );
 
   // Q1: AI Methodology
   let aiMethodology: AiMethodology = 'both';
@@ -78,7 +84,10 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
       ],
       initialValue: 'both' as AiMethodology,
     });
-    if (isCancel(result)) { cancel('Setup cancelled.'); process.exit(0); }
+    if (isCancel(result)) {
+      cancel('Setup cancelled.');
+      process.exit(0);
+    }
     aiMethodology = result as AiMethodology;
   }
 
@@ -91,7 +100,7 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
         {
           value: 'claude-code' as AgenticSystem,
           label: 'Claude Code [Recommended for most]',
-          hint: 'Anthropic\'s AI coding agent with slash commands.\nDeep BMAD + GSD integration out of the box.',
+          hint: "Anthropic's AI coding agent with slash commands.\nDeep BMAD + GSD integration out of the box.",
         },
         {
           value: 'cursor' as AgenticSystem,
@@ -106,12 +115,15 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
         {
           value: 'antigravity' as AgenticSystem,
           label: 'Antigravity (Google)',
-          hint: 'Google\'s AI assistant using Claude as underlying model.\nCompatible with BMAD agent skill files.',
+          hint: "Google's AI assistant using Claude as underlying model.\nCompatible with BMAD agent skill files.",
         },
       ],
       initialValue: 'claude-code' as AgenticSystem,
     });
-    if (isCancel(result)) { cancel('Setup cancelled.'); process.exit(0); }
+    if (isCancel(result)) {
+      cancel('Setup cancelled.');
+      process.exit(0);
+    }
     agenticSystem = result as AgenticSystem;
   }
 
@@ -134,7 +146,10 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
       ],
       initialValue: 'better-auth' as AuthProvider,
     });
-    if (isCancel(result)) { cancel('Setup cancelled.'); process.exit(0); }
+    if (isCancel(result)) {
+      cancel('Setup cancelled.');
+      process.exit(0);
+    }
     authProvider = result as AuthProvider;
   }
 
@@ -157,21 +172,27 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
       ],
       initialValue: 'prisma' as OrmChoice,
     });
-    if (isCancel(result)) { cancel('Setup cancelled.'); process.exit(0); }
+    if (isCancel(result)) {
+      cancel('Setup cancelled.');
+      process.exit(0);
+    }
     ormChoice = result as OrmChoice;
   }
 
   // Q5: Module selection — must-have + methodology-derived modules pre-checked, already-installed filtered out
   const mustHaveIds = availableModules
-    .filter(m => m.priority === 'must-have')
-    .map(m => m.id as ModuleId);
+    .filter((m) => m.priority === 'must-have')
+    .map((m) => m.id as ModuleId);
 
   // Derive pre-checked methodology modules from the aiMethodology answer
   const methodologyPreselect: ModuleId[] = ['gsd'];
   if (aiMethodology === 'bmad' || aiMethodology === 'both') methodologyPreselect.push('bmad');
+  // Pre-check autopilot for Claude Code users — it's the core differentiating feature
+  if (agenticSystem === 'claude-code') methodologyPreselect.push('autopilot');
 
-  const initialModuleIds = [...new Set([...mustHaveIds, ...methodologyPreselect])]
-    .filter(id => availableModules.some(m => m.id === id));
+  const initialModuleIds = [...new Set([...mustHaveIds, ...methodologyPreselect])].filter((id) =>
+    availableModules.some((m) => m.id === id)
+  );
 
   let selectedModules: ModuleId[];
   if (yesMode) {
@@ -179,7 +200,7 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
   } else {
     const result = await multiselect<ModuleId>({
       message: 'Select modules to install (pre-selected based on your choices):',
-      options: availableModules.map(m => ({
+      options: availableModules.map((m) => ({
         value: m.id as ModuleId,
         label: m.label,
         hint: m.description,
@@ -187,7 +208,10 @@ export async function runWizard(yesMode = false, version = ''): Promise<UserSele
       initialValues: initialModuleIds,
       required: false,
     });
-    if (isCancel(result)) { cancel('Setup cancelled.'); process.exit(0); }
+    if (isCancel(result)) {
+      cancel('Setup cancelled.');
+      process.exit(0);
+    }
     selectedModules = result as ModuleId[];
   }
 

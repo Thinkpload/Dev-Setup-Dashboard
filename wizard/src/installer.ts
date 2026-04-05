@@ -388,9 +388,15 @@ export async function runInstaller(
       }
 
       // 2. copy template files
-      // For husky: the hook files live in templates/husky/.husky/ and should go to targetDir/.husky/
-      // The copyTemplateDir call puts them in destDir, we pass targetDir so subdirs work correctly
-      copyTemplateDir(mod.templateDir, targetDir);
+      // deepCopy modules (e.g. autopilot) have nested dirs (.claude/rules/) — use deep recursive copy
+      // Regular modules use copyTemplateDir which has special .husky hook handling (LF + chmod)
+      if (mod.deepCopy) {
+        const srcDir = join(__dirname, '..', mod.templateDir);
+        copyTemplateDirDeep(srcDir, targetDir);
+      } else {
+        // For husky: hook files live in templates/husky/.husky/ → targetDir/.husky/
+        copyTemplateDir(mod.templateDir, targetDir);
+      }
 
       // 3. package.json merge
       const pkgPath = join(targetDir, 'package.json');
