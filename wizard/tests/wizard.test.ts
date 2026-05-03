@@ -31,7 +31,7 @@ describe('runWizard', () => {
       .mockResolvedValueOnce('better-auth') // Q3: authProvider
       .mockResolvedValueOnce('prisma'); // Q4: ormChoice
     vi.mocked(clack.multiselect).mockResolvedValue([
-      'eslint',
+      'biome',
       'husky',
       'vitest',
       'tsconfig',
@@ -49,7 +49,7 @@ describe('runWizard', () => {
     expect(result.agenticSystem).toBe('claude-code');
     expect(result.authProvider).toBe('better-auth');
     expect(result.ormChoice).toBe('prisma');
-    expect(result.selectedModules).toContain('eslint');
+    expect(result.selectedModules).toContain('biome');
     expect(result.selectedModules).toContain('bmad');
     expect(result.selectedModules).toContain('gsd');
   });
@@ -65,14 +65,14 @@ describe('runWizard', () => {
   });
 
   it('prompt sequence calls select FOUR times and multiselect once', async () => {
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint']);
+    vi.mocked(clack.multiselect).mockResolvedValue(['biome']);
     await runWizard(false);
     expect(clack.select).toHaveBeenCalledTimes(4);
     expect(clack.multiselect).toHaveBeenCalledTimes(1);
   });
 
   it('Q3 auth select is called with better-auth and clerk options', async () => {
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint']);
+    vi.mocked(clack.multiselect).mockResolvedValue(['biome']);
     await runWizard(false);
     // Q3 is the 3rd select call (index 2)
     const q3Call = vi.mocked(clack.select).mock.calls[2]?.[0] as {
@@ -85,7 +85,7 @@ describe('runWizard', () => {
   });
 
   it('Q4 orm select is called with prisma and drizzle options', async () => {
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint']);
+    vi.mocked(clack.multiselect).mockResolvedValue(['biome']);
     await runWizard(false);
     // Q4 is the 4th select call (index 3)
     const q4Call = vi.mocked(clack.select).mock.calls[3]?.[0] as {
@@ -98,7 +98,7 @@ describe('runWizard', () => {
   });
 
   it('UserSelections includes authProvider and ormChoice', async () => {
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint']);
+    vi.mocked(clack.multiselect).mockResolvedValue(['biome']);
     const result = await runWizard(false);
     expect(result).toHaveProperty('authProvider');
     expect(result).toHaveProperty('ormChoice');
@@ -107,7 +107,7 @@ describe('runWizard', () => {
   });
 
   it('Q1 options include "Recommended for most" label on both', async () => {
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint']);
+    vi.mocked(clack.multiselect).mockResolvedValue(['biome']);
     await runWizard(false);
     const q1Call = vi.mocked(clack.select).mock.calls[0]?.[0] as {
       options?: { value: string; label: string }[];
@@ -118,7 +118,7 @@ describe('runWizard', () => {
   });
 
   it('Q2 options include "Recommended for most" label on claude-code', async () => {
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint']);
+    vi.mocked(clack.multiselect).mockResolvedValue(['biome']);
     await runWizard(false);
     const q2Call = vi.mocked(clack.select).mock.calls[1]?.[0] as {
       options?: { value: string; label: string }[];
@@ -167,14 +167,14 @@ describe('runWizard', () => {
   });
 
   it('must-have modules appear in initialValues of multiselect', async () => {
-    vi.mocked(clack.multiselect).mockResolvedValue(['eslint', 'husky', 'vitest', 'tsconfig']);
+    vi.mocked(clack.multiselect).mockResolvedValue(['biome', 'husky', 'vitest', 'tsconfig']);
     await runWizard(false);
     const multiselectCall = vi.mocked(clack.multiselect).mock.calls[0]?.[0] as {
       initialValues?: string[];
     };
     expect(multiselectCall).toBeDefined();
     const initialValues = multiselectCall.initialValues ?? [];
-    expect(initialValues).toContain('eslint');
+    expect(initialValues).toContain('biome');
     expect(initialValues).toContain('husky');
     expect(initialValues).toContain('vitest');
     expect(initialValues).toContain('tsconfig');
@@ -187,7 +187,7 @@ describe('runWizard', () => {
       agenticSystem: 'claude-code',
       authProvider: 'better-auth',
       ormChoice: 'prisma',
-      modules: [{ id: 'eslint', installState: 'installed' }],
+      modules: [{ id: 'biome', installState: 'installed' }],
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     });
@@ -198,7 +198,7 @@ describe('runWizard', () => {
     };
     expect(multiselectCall).toBeDefined();
     const optionValues = (multiselectCall.options ?? []).map((o) => o.value);
-    expect(optionValues).not.toContain('eslint');
+    expect(optionValues).not.toContain('biome');
   });
 
   it('idempotency — log.info called (not log.warn) for already-installed modules', async () => {
@@ -208,7 +208,7 @@ describe('runWizard', () => {
       agenticSystem: 'claude-code',
       authProvider: 'better-auth',
       ormChoice: 'prisma',
-      modules: [{ id: 'eslint', installState: 'installed' }],
+      modules: [{ id: 'biome', installState: 'installed' }],
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     });
@@ -220,7 +220,7 @@ describe('runWizard', () => {
   });
 
   it('conflict detection — conflicting pair returns error string', async () => {
-    const errors = validateConflicts(['eslint', 'husky'] as import('../src/types.js').ModuleId[]);
+    const errors = validateConflicts(['biome', 'husky'] as import('../src/types.js').ModuleId[]);
     expect(Array.isArray(errors)).toBe(true);
     // No actual conflicts between eslint and husky in the registry
     expect(errors).toHaveLength(0);
@@ -238,7 +238,7 @@ describe('--yes mode non-interactive defaults', () => {
     const result = await runWizard(true);
     // Must-have modules are: husky, eslint, vitest, tsconfig
     expect(result.selectedModules).toContain('husky');
-    expect(result.selectedModules).toContain('eslint');
+    expect(result.selectedModules).toContain('biome');
     expect(result.selectedModules).toContain('vitest');
     expect(result.selectedModules).toContain('tsconfig');
     // Methodology modules (both = bmad + gsd)
@@ -280,7 +280,7 @@ describe('validateConflicts', () => {
     // All current MODULE_REGISTRY entries have empty conflicts arrays (AI-03 requirement).
     // Test the deduplication/conflict-detection logic using eslint+husky (no conflicts = empty array).
     const noConflicts = validateConflicts([
-      'eslint',
+      'biome',
       'husky',
     ] as import('../src/types.js').ModuleId[]);
     expect(noConflicts).toEqual([]);

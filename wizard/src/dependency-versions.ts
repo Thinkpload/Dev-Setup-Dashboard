@@ -56,11 +56,8 @@ export const COMMITLINT_CLI_VERSION = '^19.6.1';
 /** @commitlint/config-conventional — Conventional Commits 1.0 ruleset */
 export const COMMITLINT_CONVENTIONAL_VERSION = '^19.6.0';
 
-/** eslint — static analysis (flat config, v9+) */
-export const ESLINT_VERSION = '^9.19.0';
-
-/** typescript-eslint — TypeScript-aware ESLint rules */
-export const TYPESCRIPT_ESLINT_VERSION = '^8.58.0';
+/** @biomejs/biome — unified linter and formatter */
+export const BIOME_VERSION = '^1.9.0'; // verify: npm info @biomejs/biome version
 
 // ─── Testing ────────────────────────────────────────────────────────────────
 

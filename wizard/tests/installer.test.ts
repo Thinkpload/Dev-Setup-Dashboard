@@ -129,18 +129,18 @@ describe('mergePackageJson', () => {
   });
 
   it('injects lint-staged key into package.json when key is absent', () => {
-    mergePackageJson(join(tmpDir, 'package.json'), { 'lint-staged': { '*.ts': ['eslint --fix'] } });
+    mergePackageJson(join(tmpDir, 'package.json'), { 'lint-staged': { '*.ts': ['biome check --write'] } });
     const pkg = JSON.parse(readFileSync(join(tmpDir, 'package.json'), 'utf-8'));
     expect(pkg['lint-staged']).toBeDefined();
   });
 
   it('does NOT overwrite an existing lint-staged key (logs warning, skips)', () => {
-    const existing = { '*.ts': ['prettier --write'] };
+    const existing = { '*.ts': ['biome check --write'] };
     writeFileSync(
       join(tmpDir, 'package.json'),
       JSON.stringify({ name: 'test-project', scripts: {}, 'lint-staged': existing }, null, 2)
     );
-    mergePackageJson(join(tmpDir, 'package.json'), { 'lint-staged': { '*.ts': ['eslint --fix'] } });
+    mergePackageJson(join(tmpDir, 'package.json'), { 'lint-staged': { '*.ts': ['biome check --write'] } });
     const pkg = JSON.parse(readFileSync(join(tmpDir, 'package.json'), 'utf-8'));
     expect(pkg['lint-staged']).toEqual(existing);
   });
@@ -225,7 +225,7 @@ describe('consolidated error display', () => {
       return { status: 0, error: undefined, stderr: '' } as ReturnType<typeof spawnSync>;
     });
 
-    const selections: UserSelections = { ...baseSelections, selectedModules: ['eslint', 'vitest'] };
+    const selections: UserSelections = { ...baseSelections, selectedModules: ['biome', 'vitest'] };
     let errorCalledBeforeBothModulesFinished = false;
     vi.mocked(log.error).mockImplementation(() => {
       // At this point both modules should have had their spinner stopped
@@ -246,7 +246,7 @@ describe('consolidated error display', () => {
       error: undefined,
       stderr: 'fail',
     } as ReturnType<typeof spawnSync>);
-    const selections: UserSelections = { ...baseSelections, selectedModules: ['husky', 'eslint'] };
+    const selections: UserSelections = { ...baseSelections, selectedModules: ['husky', 'biome'] };
     await expect(runInstaller(selections, true, tmpDir)).resolves.not.toThrow();
   });
 
@@ -453,7 +453,7 @@ describe('.template-config.json persists auth and orm choices', () => {
     const selections: UserSelections = {
       ...baseSelections,
       authProvider: 'better-auth',
-      selectedModules: ['eslint'],
+      selectedModules: ['biome'],
     };
     // Pre-write config with authProvider (as buildInitialConfig does in index.ts)
     writeFileSync(
@@ -464,7 +464,7 @@ describe('.template-config.json persists auth and orm choices', () => {
         agenticSystem: 'claude-code',
         authProvider: 'better-auth',
         ormChoice: 'prisma',
-        modules: [{ id: 'eslint', installState: 'pending' }],
+        modules: [{ id: 'biome', installState: 'pending' }],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
@@ -478,7 +478,7 @@ describe('.template-config.json persists auth and orm choices', () => {
     const selections: UserSelections = {
       ...baseSelections,
       ormChoice: 'drizzle',
-      selectedModules: ['eslint'],
+      selectedModules: ['biome'],
     };
     writeFileSync(
       join(tmpDir, '.template-config.json'),
@@ -488,7 +488,7 @@ describe('.template-config.json persists auth and orm choices', () => {
         agenticSystem: 'claude-code',
         authProvider: 'better-auth',
         ormChoice: 'drizzle',
-        modules: [{ id: 'eslint', installState: 'pending' }],
+        modules: [{ id: 'biome', installState: 'pending' }],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })

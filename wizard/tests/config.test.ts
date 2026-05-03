@@ -32,7 +32,7 @@ describe('readConfig', () => {
       authProvider: 'better-auth',
       ormChoice: 'prisma',
       modules: [
-        { id: 'eslint', installState: 'pending' },
+        { id: 'biome', installState: 'pending' },
         { id: 'husky', installState: 'installed' },
       ],
       createdAt: '2026-03-15T00:00:00.000Z',
@@ -74,12 +74,12 @@ describe('readConfig', () => {
 describe('buildInitialConfig', () => {
   it('maps selectedModules to ModuleInstallRecord[] with installState pending', () => {
     const result = buildInitialConfig(
-      { aiMethodology: 'both', agenticSystem: 'claude-code', authProvider: 'better-auth', ormChoice: 'prisma', selectedModules: ['eslint', 'husky'] },
+      { aiMethodology: 'both', agenticSystem: 'claude-code', authProvider: 'better-auth', ormChoice: 'prisma', selectedModules: ['biome', 'husky'] },
       '0.1.0',
     );
     expect(result.wizardVersion).toBe('0.1.0');
     expect(result.modules).toEqual([
-      { id: 'eslint', installState: 'pending' },
+      { id: 'biome', installState: 'pending' },
       { id: 'husky', installState: 'pending' },
     ]);
     expect(result.aiMethodology).toBe('both');

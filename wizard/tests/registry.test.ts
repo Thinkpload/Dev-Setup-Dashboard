@@ -10,7 +10,7 @@ const REQUIRED_FIELDS = [
   'templateDir',
   'postInstall',
 ] as const;
-const REQUIRED_MODULES = ['husky', 'eslint', 'vitest', 'tsconfig', 'bmad', 'gsd'] as const;
+const REQUIRED_MODULES = ['husky', 'biome', 'vitest', 'tsconfig', 'bmad', 'gsd'] as const;
 
 describe('MODULE_REGISTRY', () => {
   it('is importable', async () => {
