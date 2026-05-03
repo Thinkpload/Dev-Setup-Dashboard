@@ -200,7 +200,10 @@ function getPackageJsonAdditions(moduleId: string): PackageJsonAdditions {
   const map: Record<string, PackageJsonAdditions> = {
     husky: {
       scripts: { prepare: 'husky install' },
-      'lint-staged': { '*.{ts,tsx,js,jsx}': ['eslint --fix'] },
+      'lint-staged': {
+        '*.{ts,tsx,js,mjs,cjs}': ['biome check --write --no-errors-on-unmatched'],
+        '*.{json,md,yaml,yml}': ['biome format --write --no-errors-on-unmatched'],
+      },
     },
     vitest: {
       scripts: {
@@ -208,7 +211,13 @@ function getPackageJsonAdditions(moduleId: string): PackageJsonAdditions {
         'test:coverage': 'vitest run --coverage',
       },
     },
-    eslint: { scripts: { lint: 'eslint .' } },
+    biome: {
+      scripts: {
+        lint: 'biome check src/',
+        'lint:fix': 'biome check --write src/',
+        format: 'biome format --write src/',
+      },
+    },
   };
   return map[moduleId] ?? {};
 }

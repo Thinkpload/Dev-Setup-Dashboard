@@ -39,7 +39,7 @@ export interface ModuleDefinition {
   deepCopy?: boolean;
 }
 
-export type ModuleId = 'eslint' | 'husky' | 'vitest' | 'tsconfig' | 'bmad' | 'gsd' | 'autopilot';
+export type ModuleId = 'biome' | 'husky' | 'vitest' | 'tsconfig' | 'bmad' | 'gsd' | 'autopilot';
 
 export type ModuleRegistry = Record<ModuleId, ModuleDefinition>;
 
