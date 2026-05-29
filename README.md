@@ -1,7 +1,7 @@
-# Template BMAD + auto CI/CD
+# Template: AI Dev + Auto CI/CD
 
-[![CI](https://github.com/YOUR_ORG/YOUR_REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_ORG/YOUR_REPO/actions/workflows/ci.yml)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYOUR_ORG%2FYOUR_REPO)
+[![CI](https://github.com/Thinkpload/Template-AI-dev-autoCI-CD/actions/workflows/ci.yml/badge.svg)](https://github.com/Thinkpload/Template-AI-dev-autoCI-CD/actions/workflows/ci.yml)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FThinkpload%2FTemplate-AI-dev-autoCI-CD)
 
 > One command. Five questions. Production-ready AI dev environment.
 
@@ -37,8 +37,8 @@ Click **"Use this template"** → **"Create a new repository"** on GitHub.
 ### 2. Run the interactive wizard
 
 ```bash
-git clone https://github.com/YOUR_ORG/YOUR_REPO.git
-cd YOUR_REPO
+git clone https://github.com/Thinkpload/Template-AI-dev-autoCI-CD.git
+cd Template-AI-dev-autoCI-CD
 npx create-ai-template
 ```
 
@@ -142,6 +142,24 @@ npm run verify:bmad
 
 ---
 
+## Copilot Skills
+
+The repository ships with GitHub Copilot skills for every major development pattern. These are loaded automatically when working in VS Code with GitHub Copilot.
+
+| Skill | Trigger phrase | What it does |
+| ----- | -------------- | ------------ |
+| `add-server-action` | "add a server action" | Zod schema → `ActionResult<T>` → `'use server'` function |
+| `add-ai-provider` | "add [LLM] support" | Provider module → dispatcher → env var |
+| `add-inngest-function` | "add a background job" | Function file → registration → `inngest.send()` |
+| `add-api-route` | "add an API endpoint" | Route handler → rate limiting → response conventions |
+| `add-protected-route` | "protect [route]" | `PROTECTED_PATHS` in middleware |
+| `add-db-model` | "add a [entity] table" | Prisma schema → migration → seed |
+| `add-ci-cd-pipeline` | "add CI/CD pipeline" | CI checks, auto-issues, hotfixes, releases |
+
+Skills live in `.github/skills/` and follow the project's exact file paths, naming conventions, and code patterns.
+
+---
+
 ## Project Structure
 
 ```
@@ -210,7 +228,7 @@ See the full guide: [docs/guides/template-update.md](docs/guides/template-update
 
 ### Vercel (one-click)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYOUR_ORG%2FYOUR_REPO)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FThinkpload%2FTemplate-AI-dev-autoCI-CD)
 
 Set `DATABASE_URL` to your Neon PostgreSQL connection string in Vercel environment variables.
 

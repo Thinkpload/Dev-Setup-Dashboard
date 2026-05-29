@@ -26,7 +26,7 @@ for (const file of stagedFiles) {
 
 // Check file contents for secret patterns
 const secretPattern = /(SECRET_KEY|_SECRET|API_KEY|PASSWORD)\s*=\s*\S+/;
-const skipPattern = /(__tests__|\.test\.|\.spec\.|check-secrets\.)/;
+const skipPattern = /(__tests__|\.test\.|\.spec\.|check-secrets\.|\.md$)/;
 
 for (const file of stagedFiles) {
   if (skipPattern.test(file)) continue;

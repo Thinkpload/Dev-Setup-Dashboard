@@ -1,4 +1,4 @@
-# Contributing to !Template_BMAD+auto-CI-CD
+# Contributing to Template-AI-dev-autoCI-CD
 
 Thank you for your interest in contributing! This guide covers everything you need to submit quality PRs and issues.
 
@@ -7,8 +7,8 @@ Thank you for your interest in contributing! This guide covers everything you ne
 1. **Clone the repo**
 
    ```bash
-   git clone https://github.com/Thinkpload/Template-BMAD-auto-CI-CD.git
-   cd Template-BMAD-auto-CI-CD
+   git clone https://github.com/Thinkpload/Template-AI-dev-autoCI-CD.git
+   cd Template-AI-dev-autoCI-CD
    ```
 
 2. **Install dependencies**
