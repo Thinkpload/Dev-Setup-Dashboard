@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { NextRequest } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 function mockRequest(ip?: string): NextRequest {
   const headers = new Headers();
@@ -46,10 +46,10 @@ describe('createRateLimit — with live redis mock', () => {
       .fn()
       .mockResolvedValue({ success: true, limit: 100, remaining: 99, reset: 0 });
     vi.doMock('@upstash/ratelimit', () => ({
-      Ratelimit: Object.assign(
-        vi.fn().mockImplementation(() => ({ limit: limitFn })),
-        { slidingWindow: vi.fn().mockReturnValue('sliding') }
-      ),
+      Ratelimit: class {
+        limit = limitFn;
+        static slidingWindow = vi.fn().mockReturnValue('sliding');
+      },
     }));
     vi.doMock('../redis', () => ({ redis: { type: 'mock' } }));
 
@@ -65,10 +65,10 @@ describe('createRateLimit — with live redis mock', () => {
       .fn()
       .mockResolvedValue({ success: true, limit: 100, remaining: 99, reset: 0 });
     vi.doMock('@upstash/ratelimit', () => ({
-      Ratelimit: Object.assign(
-        vi.fn().mockImplementation(() => ({ limit: limitFn })),
-        { slidingWindow: vi.fn().mockReturnValue('sliding') }
-      ),
+      Ratelimit: class {
+        limit = limitFn;
+        static slidingWindow = vi.fn().mockReturnValue('sliding');
+      },
     }));
     vi.doMock('../redis', () => ({ redis: { type: 'mock' } }));
 
@@ -84,10 +84,10 @@ describe('createRateLimit — with live redis mock', () => {
       .fn()
       .mockResolvedValue({ success: false, limit: 100, remaining: 0, reset: Date.now() + 60000 });
     vi.doMock('@upstash/ratelimit', () => ({
-      Ratelimit: Object.assign(
-        vi.fn().mockImplementation(() => ({ limit: limitFn })),
-        { slidingWindow: vi.fn().mockReturnValue('sliding') }
-      ),
+      Ratelimit: class {
+        limit = limitFn;
+        static slidingWindow = vi.fn().mockReturnValue('sliding');
+      },
     }));
     vi.doMock('../redis', () => ({ redis: { type: 'mock' } }));
 

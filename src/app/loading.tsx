@@ -8,6 +8,7 @@ export default function Loading() {
         <Skeleton className="h-8 w-32" />
         <div className="space-y-2 mt-8">
           {Array.from({ length: 4 }).map((_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list, items never reorder
             <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export function useSidebar() {
   const [open, setOpenRaw] = useState(false);

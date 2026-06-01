@@ -1,11 +1,11 @@
 'use client';
 
-import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Sidebar } from './Sidebar';
-import { DashboardBreadcrumb } from './Breadcrumb';
 import { useSidebar } from '@/hooks/useSidebar';
+import { Menu } from 'lucide-react';
+import { DashboardBreadcrumb } from './Breadcrumb';
+import { Sidebar } from './Sidebar';
 
 export function DashboardHeader() {
   const { open, setOpen, triggerRef } = useSidebar();

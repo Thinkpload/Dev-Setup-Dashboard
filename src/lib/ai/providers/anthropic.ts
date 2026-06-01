@@ -21,5 +21,5 @@ export async function createAnthropicCompletion({
   });
 
   const firstContent = response.content[0];
-  return firstContent.type === 'text' ? firstContent.text : '';
+  return firstContent?.type === 'text' ? firstContent.text : '';
 }

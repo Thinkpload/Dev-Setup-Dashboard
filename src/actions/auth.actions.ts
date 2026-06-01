@@ -7,7 +7,7 @@ export async function signInAction(data: unknown): Promise<ActionResult<{ redire
   try {
     const parsed = signInSchema.safeParse(data);
     if (!parsed.success) {
-      return { success: false, error: parsed.error.errors[0].message };
+      return { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid input' };
     }
 
     // TODO: replace with real Better Auth signIn call when story 4.1 (DB) is done
@@ -27,7 +27,7 @@ export async function signUpAction(data: unknown): Promise<ActionResult<{ redire
   try {
     const parsed = signUpSchema.safeParse(data);
     if (!parsed.success) {
-      return { success: false, error: parsed.error.errors[0].message };
+      return { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid input' };
     }
 
     // TODO: replace with real Better Auth signUp call when story 4.1 (DB) is done

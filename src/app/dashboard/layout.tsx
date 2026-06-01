@@ -1,5 +1,5 @@
-import { Sidebar } from '@/components/shared/Sidebar';
 import { DashboardHeader } from '@/components/shared/DashboardHeader';
+import { Sidebar } from '@/components/shared/Sidebar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

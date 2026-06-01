@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { signInSchema, signUpSchema } from './auth.schema';
 
 describe('signInSchema', () => {
@@ -16,7 +16,7 @@ describe('signInSchema', () => {
     const result = signInSchema.safeParse({ email: 'user@example.com', password: 'short' });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.errors[0].message).toMatch(/8 characters/i);
+      expect(result.error.errors[0]?.message).toMatch(/8 characters/i);
     }
   });
 
@@ -43,7 +43,7 @@ describe('signUpSchema', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.errors[0].message).toMatch(/2 characters/i);
+      expect(result.error.errors[0]?.message).toMatch(/2 characters/i);
     }
   });
 

@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sentry } from '@/lib/sentry';
+import { useEffect } from 'react';
 
 export default function ErrorPage({
   error,

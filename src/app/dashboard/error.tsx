@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Dashboard-scoped error boundary — renders inside DashboardLayout.
 // "Try again" resets only the dashboard subtree, not the full page.

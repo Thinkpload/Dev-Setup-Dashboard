@@ -1,8 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock inngest before importing client
 vi.mock('inngest', () => ({
-  Inngest: vi.fn().mockImplementation((config: { id: string }) => ({ id: config.id })),
+  Inngest: class {
+    id: string;
+    constructor(config: { id: string }) {
+      this.id = config.id;
+    }
+  },
 }));
 
 describe('src/inngest/client.ts', () => {

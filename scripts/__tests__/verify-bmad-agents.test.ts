@@ -6,7 +6,7 @@ import * as fs from 'fs';
 // We test the core logic extracted from verify-bmad-agents.ts
 // The module exports { REQUIRED_AGENTS, checkAgents } for testability
 
-vi.mock('fs');
+vi.mock('fs', () => ({ existsSync: vi.fn() }));
 
 const REQUIRED_AGENTS = [
   'bmad-pm',

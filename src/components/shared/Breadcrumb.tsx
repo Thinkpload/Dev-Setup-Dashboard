@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +8,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface Crumb {
   label: string;
@@ -21,7 +21,7 @@ function pathToCrumbs(pathname: string): Crumb[] {
   const parts = pathname.split('/').filter(Boolean).slice(0, 3);
   return parts.map((part, i) => ({
     label: part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '),
-    href: '/' + parts.slice(0, i + 1).join('/'),
+    href: `/${parts.slice(0, i + 1).join('/')}`,
     isLast: i === parts.length - 1,
   }));
 }

@@ -1,6 +1,6 @@
-import { Ratelimit, type Duration } from '@upstash/ratelimit';
-import { redis } from './redis';
+import { type Duration, Ratelimit } from '@upstash/ratelimit';
 import type { NextRequest } from 'next/server';
+import { redis } from './redis';
 
 interface RateLimitOptions {
   limit?: number;

@@ -1,4 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Mock @upstash/redis to avoid real HTTP calls
+vi.mock('@upstash/redis', () => ({
+  Redis: class {
+    type = 'mock-redis';
+  },
+}));
 
 describe('redis singleton', () => {
   const originalEnv = process.env;
@@ -29,10 +36,6 @@ describe('redis singleton', () => {
   it('exports Redis instance when both env vars are set', async () => {
     process.env.UPSTASH_REDIS_REST_URL = 'https://example.upstash.io';
     process.env.UPSTASH_REDIS_REST_TOKEN = 'test-token';
-    // Mock @upstash/redis to avoid real HTTP calls
-    vi.mock('@upstash/redis', () => ({
-      Redis: vi.fn().mockImplementation(() => ({ type: 'mock-redis' })),
-    }));
     const { redis } = await import('../redis');
     expect(redis).not.toBeNull();
   });

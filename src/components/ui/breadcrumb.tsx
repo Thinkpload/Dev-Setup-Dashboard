@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
+import type * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import { ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react';
@@ -52,6 +52,7 @@ function BreadcrumbLink({ className, render, ...props }: useRender.ComponentProp
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   return (
+    // biome-ignore lint/a11y/useFocusableInteractive: current-page marker is intentionally non-focusable (aria-disabled)
     <span
       data-slot="breadcrumb-page"
       role="link"
