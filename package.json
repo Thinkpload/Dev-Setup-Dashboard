@@ -85,7 +85,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,mjs,cjs}": ["biome check --write --no-errors-on-unmatched"],
+    "*.{ts,tsx,js,mjs,cjs}": ["biome format --write --no-errors-on-unmatched"],
     "*.{json,md,yaml,yml}": ["biome format --write --no-errors-on-unmatched"]
   }
 }
