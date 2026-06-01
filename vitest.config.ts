@@ -1,7 +1,7 @@
 // Compatible with vitest ^4.0.0 and @vitest/coverage-v8 ^4.0.0
 // Review coverage API on major version bumps
 // Output path coverage/lcov.info matches sonar-project.properties sonar.javascript.lcov.reportPaths
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
