@@ -73,6 +73,32 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project
 
-**Stack:** Next.js · Drizzle ORM · Prisma · Zod · Vitest · Tailwind CSS · TypeScript
+A GitHub **template repository** for bootstrapping AI SaaS projects: a working Next.js 15 app + a `create-ai-template` CLI wizard + BMAD/GSD agent tooling + a full CI/CD + auto-bugfix pipeline that downstream projects inherit.
 
-> TODO: fill in project-specific commands, conventions, and do/don't rules.
+**Stack:** Next.js 15 (App Router, React 19) · TypeScript (strict) · Tailwind v4 + shadcn/ui · Zod · Vitest (unit) + Playwright (e2e) · Biome (lint/format) · PostgreSQL.
+Auth (Better Auth | Clerk) and ORM (Prisma | Drizzle) are **wizard-selectable alternatives, not both active at once** — check the active config before editing `src/lib/auth.ts` or `src/lib/db.ts`.
+
+**Orientation:** read [.planning/PROJECT-MAP.md](.planning/PROJECT-MAP.md) first — it explains signal vs. noise. ~95% of tracked files are AI-agent scaffolding (`_bmad/`, `.claude/`, `.gemini/`, `.agent/`, `.opencode/`, `.planning/`); treat those as vendored — don't audit unless asked. The real project is `src/` (app), `wizard/` (separate package), `.github/workflows/`, `prisma/`, `scripts/`, `e2e/`.
+
+### Commands
+
+```bash
+npm run dev            # Next.js dev (Turbopack)
+npm run build          # production build
+npm run lint           # biome check src/   (NOT eslint)
+npm run test           # vitest (watch)
+npm run test:coverage  # vitest run --coverage  (85%/80% gate)
+npm run type-check     # tsc --noEmit
+npm run db:seed        # tsx prisma/seed.ts
+npm run verify:bmad    # confirm BMAD agents present
+npm run template:update# pull latest template scaffolding into a downstream repo
+```
+
+### Gotchas
+
+- **`npm ci --legacy-peer-deps` is required** everywhere (better-auth ↔ drizzle-kit peer conflict). Plain `npm ci` fails.
+- Lint/format is **Biome**, not ESLint — ignore any stray ESLint references.
+- CI build needs stub env (`SKIP_ENV_VALIDATION=1` + stub `DATABASE_URL`/`NEXTAUTH_*`).
+- `CHANGELOG.md` is **auto-generated** by `conventional-changelog` on release — never hand-edit it.
+- `.bak` twins (`auth.ts.bak`, `db.ts.bak`, …) are pre-existing wizard leftovers — not yours to delete.
+- Tests are co-located: `src/foo.ts` → `src/foo.test.ts` / `__tests__/`.

@@ -102,12 +102,12 @@ PRs without tests for new logic will be asked to add them before merge.
 - **TypeScript strict mode** — no implicit `any`
 - If you must disable a lint rule, add a comment explaining why:
   ```ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- external API has unknown shape
+  // biome-ignore lint/suspicious/noExplicitAny: external API has unknown shape
   ```
 - **Naming**: `camelCase` for TypeScript, `snake_case` for database columns
 - **No business logic in React components** — put it in `src/actions/` or `src/lib/`
 - **No `console.log` in production code** — use structured logging
-- ESLint config: [`eslint.config.mjs`](./eslint.config.mjs)
+- Lint/format config (Biome): [`biome.json`](./biome.json) — run `npm run lint` / `npm run format`
 
 ## Setting up NPM_TOKEN
 
