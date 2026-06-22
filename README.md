@@ -83,6 +83,46 @@ Go to **Settings → Secrets and variables → Actions**:
 
 ---
 
+## Demo App / Web UI
+
+After `npm run dev`, the template ships a working demo app (dark theme, Tailwind v4 + shadcn/ui) so you can see the stack wired end-to-end. Routes live in `src/app/` (App Router).
+
+### Pages
+
+| Route | Access | What's there |
+| ----- | ------ | ------------ |
+| `/` | Public | Landing page: `Navbar` → **Skill Chooser** (hero + interactive panel) → **Helper feature strip** → footer |
+| `/sign-in`, `/sign-up` | Public | Auth pages (`(auth)` route group, shared auth layout) |
+| `/dashboard` | Protected | App shell (`Sidebar`, `Navbar`, `DashboardHeader`, `Breadcrumb`) with an `EmptyState` welcome — your starting canvas |
+
+> The landing page renders at `http://localhost:3000` (falls back to `3001` if the port is busy).
+
+### Skill Chooser (landing page)
+
+The hero + panel are an interactive recommender. Pick three things and it suggests where to start:
+
+- **Intent** — Shape a new idea · Build something quickly · Write a structured plan · Debug an issue · Review existing work
+- **Guidance level** — Fast · Balanced · Rigorous
+- **Project type** — Web app · API · AI feature · Brownfield improvement
+
+It returns a recommended path, suggested starting point, and concrete next steps. The **Helper feature strip** below it maps those choices to setup lanes (new product → `npx create-ai-template`, brownfield → `systematic-debugging`, quality → `npm run verify:bmad`).
+
+### API routes (`src/app/api/`)
+
+| Route | Purpose |
+| ----- | ------- |
+| `POST /api/ai/chat` | Streaming AI chat over the provider abstraction (`src/lib/ai/` — Anthropic / OpenAI) |
+| `/api/auth/[...all]` | Auth handler (Better Auth catch-all; replaced by Clerk if selected) |
+| `/api/inngest` | Inngest background-job endpoint (`src/inngest/`) |
+
+### Key UI source
+
+- `src/components/features/` — `SkillChooserHero`, `SkillChooserPanel`, `HelperFeatureStrip`, `FeatureCard`, `GradientHero`, `CodeBlock`, `SetupStatusBadge` (data in `skill-chooser-data.ts`)
+- `src/components/shared/` — `Navbar`, `Sidebar`, `DashboardHeader`, `Breadcrumb`, `EmptyState`
+- `src/components/ui/` — shadcn/ui primitives (do not edit by hand)
+
+---
+
 ## Auto-Bugfix Pipeline
 
 The template's killer feature: when CI fails, a structured GitHub Issue is created automatically.

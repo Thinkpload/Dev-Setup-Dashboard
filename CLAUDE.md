@@ -80,12 +80,19 @@ Auth (Better Auth | Clerk) and ORM (Prisma | Drizzle) are **wizard-selectable al
 
 **Orientation:** read [.planning/PROJECT-MAP.md](.planning/PROJECT-MAP.md) first — it explains signal vs. noise. ~95% of tracked files are AI-agent scaffolding (`_bmad/`, `.claude/`, `.gemini/`, `.agent/`, `.opencode/`, `.planning/`); treat those as vendored — don't audit unless asked. The real project is `src/` (app), `wizard/` (separate package), `.github/workflows/`, `prisma/`, `scripts/`, `e2e/`.
 
+### Web UI (`src/app/`)
+
+- `/` — public landing: **Skill Chooser** (hero + panel) and Dev Setup Helper strip
+- `/sign-in`, `/sign-up` — auth pages (`(auth)` route group)
+- `/dashboard` — protected; shell in `src/components/shared/` (Sidebar, Navbar, DashboardHeader)
+
 ### Commands
 
 ```bash
 npm run dev            # Next.js dev (Turbopack)
 npm run build          # production build
 npm run lint           # biome check src/   (NOT eslint)
+npm run lint:fix       # biome check --write src/  (auto-fix)
 npm run test           # vitest (watch)
 npm run test:coverage  # vitest run --coverage  (85%/80% gate)
 npm run type-check     # tsc --noEmit
@@ -96,6 +103,7 @@ npm run template:update# pull latest template scaffolding into a downstream repo
 
 ### Gotchas
 
+- `npm run dev` serves on `http://localhost:3000`, but falls back to `3001` if 3000 is busy.
 - **`npm ci --legacy-peer-deps` is required** everywhere (better-auth ↔ drizzle-kit peer conflict). Plain `npm ci` fails.
 - Lint/format is **Biome**, not ESLint — ignore any stray ESLint references.
 - CI build needs stub env (`SKIP_ENV_VALIDATION=1` + stub `DATABASE_URL`/`NEXTAUTH_*`).
